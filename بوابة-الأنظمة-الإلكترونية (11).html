@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بوابة الأنظمة الإلكترونية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --maroon:#7a1029;
+    --maroon-2:#4f0916;
+    --maroon-soft:#a11a3a;
+    --gold:#c9a227;
+    --gold-d:#8a6f1f;
+    --paper:#f7f3ea;
+    --card:#fffdf8;
+    --ink:#241b1a;
+    --muted:#6b6058;
+    --line:#e8ddc9;
+    --success:#1f7a4a;
+    --success-bg:#e7f4ec;
+    --off:#8a7268;
+    --off-bg:#f2e9e2;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Tajawal',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    direction:rtl;
+  }
+  h1,h2,h3{font-family:'Cairo',sans-serif;margin:0;}
+  a{color:inherit;}
+  button{font-family:'Tajawal',sans-serif;}
+
+  /* ===== Header ===== */
+  .site-header{background:var(--maroon);color:#fff;}
+  .header-inner{
+    max-width:1200px;margin:0 auto;padding:18px 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:14px;}
+  .seal{
+    width:52px;height:52px;border-radius:50%;
+    border:2.5px dashed var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    background:var(--maroon-2);color:#fff;flex-shrink:0;
+    font-family:'Cairo',sans-serif;font-weight:800;font-size:19px;
+  }
+  .brand-text h1{font-size:19px;color:#fff;letter-spacing:.2px;}
+  .brand-text p{margin:3px 0 0;color:#e8cfd6;font-size:12.5px;}
+  .header-actions{display:flex;align-items:center;gap:16px;}
+  .user-chip{
+    display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.18);border-radius:30px;padding:6px 14px 6px 8px;
+    font-size:13px;font-weight:700;
+  }
+  .user-avatar{
+    width:26px;height:26px;border-radius:50%;background:var(--gold);color:var(--maroon-2);
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;font-family:'Cairo',sans-serif;
+  }
+  .logout-link{font-size:12.5px;color:#f1d6db;text-decoration:none;font-weight:700;border-bottom:1px dashed rgba(241,214,219,.6);padding-bottom:1px;}
+  .logout-link:hover{color:#fff;}
+  .icon-btn{
+    width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.08);color:#fff;font-size:15px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;transition:.15s;
+  }
+  .icon-btn:hover{background:rgba(255,255,255,.18);}
+
+  /* signature pattern band — sadu-inspired triangle strip */
+  .pattern-band{
+    height:9px;
+    background-image:
+      linear-gradient(135deg, var(--gold) 25%, transparent 25.5%),
+      linear-gradient(225deg, var(--gold) 25%, transparent 25.5%);
+    background-position:0 0;
+    background-size:14px 14px;
+    background-color:var(--maroon-2);
+  }
+
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 24px 70px;}
+
+  /* ===== Stats ===== */
+  .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:26px;}
+  .stat-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 16px;box-shadow:0 1px 2px rgba(74,12,26,.04);
+    position:relative;overflow:hidden;
+  }
+  .stat-card::before{
+    content:"";position:absolute;top:0;right:0;width:4px;height:100%;background:var(--gold);
+  }
+  .stat-num{font-family:'Cairo',sans-serif;font-weight:800;font-size:26px;color:var(--maroon);}
+  .stat-label{font-size:12.5px;color:var(--muted);margin-top:4px;font-weight:700;}
+
+  /* ===== Section title ===== */
+  .section-title{display:flex;align-items:center;justify-content:space-between;margin:8px 0 14px;flex-wrap:wrap;gap:10px;}
+  .section-title h2{font-size:17px;color:var(--maroon-2);}
+  .section-title .count{font-size:12.5px;color:var(--muted);font-weight:700;}
+
+  /* ===== Controls ===== */
+  .controls{
+    display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;
+  }
+  .search-box{position:relative;flex:1;min-width:220px;}
+  .search-box input{
+    width:100%;padding:10px 38px 10px 12px;border:1.5px solid var(--line);border-radius:9px;
+    font-family:'Tajawal';font-size:13.5px;background:var(--paper);
+  }
+  .search-box input:focus{outline:none;border-color:var(--maroon-soft);}
+  .search-box .ic{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;}
+  select{
+    padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;background:var(--paper);
+    font-family:'Tajawal';font-size:13.5px;color:var(--ink);min-width:150px;
+  }
+  select:focus{outline:none;border-color:var(--maroon-soft);}
+  .chip-group{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    border:1.5px solid var(--line);background:var(--paper);color:var(--muted);
+    padding:8px 14px;border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;
+  }
+  .chip.active{background:var(--maroon);border-color:var(--maroon);color:#fff;}
+  .chip:hover:not(.active){border-color:var(--maroon-soft);color:var(--maroon-soft);}
+
+  /* ===== Table ===== */
+  .table-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;box-shadow:0 1px 3px rgba(74,12,26,.05);
+  }
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  thead th{
+    background:var(--maroon);color:#f3e3e7;text-align:right;padding:12px 14px;
+    font-family:'Cairo',sans-serif;font-weight:700;font-size:12.5px;white-space:nowrap;
+  }
+  tbody td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#fbf4e8;}
+  .sys-icon{
+    width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    font-size:16px;background:var(--off-bg);flex-shrink:0;
+  }
+  .sys-name-cell{display:flex;align-items:center;gap:10px;}
+  .sys-name{font-weight:700;color:var(--ink);}
+  .sys-desc{color:var(--muted);font-size:12px;max-width:260px;}
+  .badge-cat{
+    display:inline-block;background:var(--off-bg);color:#6b4a3a;border:1px solid #e6d5c8;
+    font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;
+  }
+  .badge-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;}
+  .badge-status.on{background:var(--success-bg);color:var(--success);}
+  .badge-status.off{background:var(--off-bg);color:var(--off);}
+  .badge-status .dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+  .updated-cell{color:var(--muted);font-size:12px;white-space:nowrap;}
+  .actions-cell{display:flex;gap:6px;flex-wrap:nowrap;}
+  .act-btn{
+    border:1.5px solid var(--line);background:var(--paper);color:var(--maroon-2);
+    font-size:12px;font-weight:700;padding:6px 10px;border-radius:7px;cursor:pointer;white-space:nowrap;
+    text-decoration:none;display:inline-flex;align-items:center;gap:4px;transition:.15s;
+  }
+  .act-btn.primary{background:var(--maroon);border-color:var(--maroon);color:#fff;}
+  .act-btn.primary:hover{background:var(--maroon-2);}
+  .act-btn:hover:not(.primary){border-color:var(--maroon-soft);color:var(--maroon-soft);}
+  .empty-row td{text-align:center;padding:40px 14px;color:var(--muted);}
+
+  /* ===== Modal ===== */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(74,12,26,.5);display:none;
+    align-items:center;justify-content:center;z-index:300;padding:16px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-card{
+    background:var(--card);border-radius:var(--radius);max-width:440px;width:100%;
+    max-height:88vh;overflow-y:auto;box-shadow:0 20px 50px rgba(74,12,26,.3);
+  }
+  .modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);}
+  .modal-head h3{font-size:15.5px;color:var(--maroon-2);}
+  .modal-close{background:none;border:none;font-size:16px;color:var(--muted);cursor:pointer;}
+  .modal-body{padding:16px 20px;}
+  .modal-body .field{margin-bottom:14px;}
+  .modal-body label{display:block;font-size:12.5px;font-weight:700;color:var(--maroon-2);margin-bottom:5px;}
+  .modal-body input,.modal-body select,.modal-body textarea{
+    width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;
+    font-family:'Tajawal';font-size:13px;background:var(--paper);resize:vertical;
+  }
+  .modal-body input:focus,.modal-body select:focus,.modal-body textarea:focus{outline:none;border-color:var(--maroon-soft);}
+  .modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--line);}
+
+  footer{max-width:1200px;margin:30px auto 0;padding:18px 24px 0;border-top:1px solid var(--line);
+    color:var(--muted);font-size:12px;text-align:center;}
+
+  /* toast */
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--maroon-2);color:#fff;padding:12px 22px;border-radius:10px;font-size:13px;font-weight:700;
+    box-shadow:0 8px 24px rgba(74,12,26,.3);opacity:0;pointer-events:none;transition:.25s;z-index:400;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:900px){
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    table{display:block;overflow-x:auto;white-space:nowrap;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="seal">إ</div>
+      <div class="brand-text">
+        <h1>بوابة الأنظمة الإلكترونية</h1>
+        <p>المنصة المركزية لإدارة روابط الأنظمة والمواقع الداخلية</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="refreshBtn" title="تحديث الصفحة">⟳</button>
+      <button class="icon-btn" id="closeBtn" title="إغلاق">✕</button>
+      <div class="user-chip">
+        <div class="user-avatar">م</div>
+        <span>محمد العلي</span>
+      </div>
+      <a href="#" class="logout-link" id="logoutLink">تسجيل الخروج</a>
+    </div>
+  </div>
+</header>
+<div class="pattern-band"></div>
+
+<div class="wrap">
+
+  <div class="stats-row" id="statsRow"></div>
+
+  <div class="section-title">
+    <h2>الأنظمة والمواقع</h2>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span class="count" id="resultCount"></span>
+      <button class="act-btn primary" id="addSystemBtn">+ إضافة نظام</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="ابحث باسم النظام أو الوصف...">
+      <span class="ic">🔍</span>
+    </div>
+    <select id="categorySelect"></select>
+    <div class="chip-group" id="statusChips">
+      <button class="chip active" data-status="all">الكل</button>
+      <button class="chip" data-status="on">مفعّل</button>
+      <button class="chip" data-status="off">معطّل</button>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>م</th>
+          <th>النظام</th>
+          <th>التصنيف</th>
+          <th>الحالة</th>
+          <th>آخر تحديث</th>
+          <th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <footer>© بوابة الأنظمة الإلكترونية — نموذج عرض توضيحي داخلي</footer>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="modalTitle">إضافة نظام جديد</h3>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>اسم النظام</label><input type="text" id="f_name" placeholder="مثال: النظام المالي"></div>
+      <div class="field"><label>الأيقونة (رمز تعبيري)</label><input type="text" id="f_icon" placeholder="📁" maxlength="4"></div>
+      <div class="field"><label>التصنيف</label>
+        <input type="text" id="f_category" list="catList" placeholder="اختر أو اكتب تصنيفًا">
+        <datalist id="catList"></datalist>
+      </div>
+      <div class="field"><label>الوصف</label><textarea id="f_desc" rows="2" placeholder="وصف مختصر للنظام"></textarea></div>
+      <div class="field"><label>رابط الدخول</label><input type="text" id="f_url" placeholder="https:// أو اسم صفحة داخل البوابة"></div>
+      <div class="field">
+        <label>رفع ملف HTML (بديل عن الرابط)</label>
+        <input type="file" id="f_html" accept=".html,.htm">
+        <div id="f_html_hint" style="font-size:11.5px;color:var(--muted);margin-top:5px;"></div>
+      </div>
+      <div class="field">
+        <label>الحالة</label>
+        <select id="f_status"><option value="on">مفعّل</option><option value="off">معطّل</option></select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="act-btn" id="modalCancel">إلغاء</button>
+      <button class="act-btn primary" id="modalSave">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+/* ---------------- Firebase (Firestore) — same project as registration.html ---------------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDKzYNTWD5d9aq1qNhRTSFFCsv6LEoDC0I",
+  authDomain: "tsgeel-d4004.firebaseapp.com",
+  projectId: "tsgeel-d4004",
+  storageBucket: "tsgeel-d4004.firebasestorage.app",
+  messagingSenderId: "261651902744",
+  appId: "1:261651902744:web:58fbad156c1aa293d82e6d",
+  measurementId: "G-RTGW6SHE6Y"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const COL = "portal_systems"; // one document per system/link shown on the portal home page
+
+const SEED = [
+  { name:"تسجيل الطلاب", icon:"📝", category:"تسجيل الطلاب", desc:"إدارة طلبات التسجيل والقبول للبرامج والصفوف", status:"on", updated:"2026-07-27", url:"registration.html", visits:1284 },
+  { name:"إدارة الموارد البشرية", icon:"👥", category:"الموارد البشرية", desc:"ملفات الموظفين والإجازات والدوام", status:"on", updated:"2026-07-25", url:"#", visits:842 },
+  { name:"النظام المالي", icon:"💰", category:"مالي", desc:"المصروفات والميزانيات والتقارير المالية", status:"on", updated:"2026-07-20", url:"#", visits:611 },
+  { name:"بوابة التقارير الإدارية", icon:"📊", category:"التقارير", desc:"تقارير الأداء والمؤشرات الدورية", status:"on", updated:"2026-07-18", url:"#", visits:397 },
+  { name:"الخدمات الإلكترونية للعملاء", icon:"🌐", category:"الخدمات الإلكترونية", desc:"طلبات الخدمة الإلكترونية والمتابعة", status:"on", updated:"2026-07-15", url:"#", visits:2033 },
+  { name:"إدارة البرامج التدريبية", icon:"🎓", category:"البرامج التدريبية", desc:"جدولة الدورات التدريبية والمدربين", status:"off", updated:"2026-06-30", url:"#", visits:156 },
+  { name:"الأرشيف الإداري", icon:"🗂️", category:"إداري", desc:"حفظ ومتابعة المعاملات والمراسلات", status:"on", updated:"2026-07-10", url:"#", visits:289 },
+  { name:"الأنظمة الداخلية للمنشآت", icon:"🏢", category:"الأنظمة الداخلية", desc:"إدارة المرافق والصيانة الدورية", status:"off", updated:"2026-06-12", url:"#", visits:74 },
+];
+
+function newId(){ return "s" + Date.now() + Math.random().toString(36).slice(2,7); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+let SYSTEMS = [];      // live cache of {id, ...fields} synced from Firestore
+let CATEGORIES = [];
+let filters = { q:"", category:"all", status:"all" };
+let editingId = null;  // set when the modal is editing an existing system
+let pendingHtml = null; // {name, content} when a new HTML file is chosen in the modal
+const MAX_HTML_SIZE = 900000;
+
+async function ensureSeeded(){
+  const snap = await getDocs(collection(db, COL));
+  if(snap.empty){
+    await Promise.all(SEED.map(s => setDoc(doc(db, COL, newId()), s)));
+  }
+}
+
+function subscribe(){
+  onSnapshot(collection(db, COL), snap=>{
+    SYSTEMS = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    CATEGORIES = [...new Set(SYSTEMS.map(s=>s.category))];
+    fillCategorySelect();
+    renderStats();
+    renderTable();
+  }, err=>{
+    console.error(err);
+    showToast('تعذّر الاتصال بقاعدة البيانات، تحقق من الاتصال بالإنترنت');
+  });
+}
+
+function fillCategorySelect(){
+  const sel = document.getElementById('categorySelect');
+  const current = sel.value || "all";
+  sel.innerHTML = `<option value="all">كل التصنيفات</option>` +
+    CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join("");
+  sel.value = CATEGORIES.includes(current) ? current : "all";
+
+  document.getElementById('catList').innerHTML = CATEGORIES.map(c=>`<option value="${c}">`).join("");
+}
+
+function renderStats(){
+  const total = SYSTEMS.length;
+  const on = SYSTEMS.filter(s=>s.status==="on").length;
+  const off = total - on;
+  const cats = CATEGORIES.length;
+  const visits = SYSTEMS.reduce((a,s)=>a+(s.visits||0),0);
+  const stats = [
+    { num: total, label: "عدد المواقع" },
+    { num: cats, label: "عدد التصنيفات" },
+    { num: on, label: "المواقع المفعّلة" },
+    { num: off, label: "المواقع المعطّلة" },
+    { num: visits.toLocaleString('ar'), label: "إجمالي الزيارات" },
+  ];
+  document.getElementById('statsRow').innerHTML = stats.map(s=>`
+    <div class="stat-card">
+      <div class="stat-num">${s.num}</div>
+      <div class="stat-label">${s.label}</div>
+    </div>`).join("");
+}
+
+function getFiltered(){
+  return SYSTEMS.filter(s=>{
+    if(filters.status!=="all" && s.status!==filters.status) return false;
+    if(filters.category!=="all" && s.category!==filters.category) return false;
+    if(filters.q && !(s.name.includes(filters.q) || s.desc.includes(filters.q))) return false;
+    return true;
+  });
+}
+
+function esc(str){
+  return String(str||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function renderTable(){
+  const rows = getFiltered();
+  document.getElementById('resultCount').textContent = `${rows.length} من ${SYSTEMS.length} نظام`;
+  const body = document.getElementById('tableBody');
+  if(!rows.length){
+    body.innerHTML = `<tr class="empty-row"><td colspan="6">لا توجد نتائج مطابقة لبحثك</td></tr>`;
+    return;
+  }
+  body.innerHTML = rows.map((s,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>
+        <div class="sys-name-cell">
+          <div class="sys-icon">${esc(s.icon)||"📁"}</div>
+          <div>
+            <div class="sys-name">${esc(s.name)}</div>
+            <div class="sys-desc">${esc(s.desc)}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="badge-cat">${esc(s.category)}</span></td>
+      <td><span class="badge-status ${s.status==='on'?'on':'off'}"><span class="dot"></span>${s.status==='on'?'مفعّل':'معطّل'}</span></td>
+      <td class="updated-cell">${esc(s.updated)}</td>
+      <td>
+        <div class="actions-cell">
+          <a class="act-btn primary" href="${esc(s.url)||'#'}" data-id="${s.id}" data-open>${s.htmlContent && (!s.url || s.url==='#') ? 'فتح الملف ↗' : 'فتح ↗'}</a>
+          <button class="act-btn" data-id="${s.id}" data-toggle>${s.status==='on'?'تعطيل':'تفعيل'}</button>
+          <button class="act-btn" data-id="${s.id}" data-edit>تعديل</button>
+          <button class="act-btn" data-id="${s.id}" data-delete>حذف</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ---------------- Modal (add / edit) ---------------- */
+function openModal(system){
+  editingId = system ? system.id : null;
+  pendingHtml = null;
+  document.getElementById('modalTitle').textContent = system ? "تعديل النظام" : "إضافة نظام جديد";
+  document.getElementById('f_name').value = system?.name || "";
+  document.getElementById('f_icon').value = system?.icon || "📁";
+  document.getElementById('f_category').value = system?.category || "";
+  document.getElementById('f_desc').value = system?.desc || "";
+  document.getElementById('f_url').value = system?.url && system.url!=='#' ? system.url : "";
+  document.getElementById('f_status').value = system?.status || "on";
+  document.getElementById('f_html').value = "";
+  document.getElementById('f_html_hint').textContent = system?.htmlFileName ? `يوجد ملف مرفق حاليًا: ${system.htmlFileName} — اختر ملفًا جديدًا لاستبداله` : "";
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('show');
+  editingId = null;
+}
+
+async function saveModal(){
+  const name = document.getElementById('f_name').value.trim();
+  const category = document.getElementById('f_category').value.trim();
+  if(!name || !category){ showToast('يرجى إدخال اسم النظام والتصنيف'); return; }
+  const data = {
+    name,
+    icon: document.getElementById('f_icon').value.trim() || "📁",
+    category,
+    desc: document.getElementById('f_desc').value.trim(),
+    url: document.getElementById('f_url').value.trim() || "#",
+    status: document.getElementById('f_status').value,
+    updated: todayStr(),
+    visits: editingId ? (SYSTEMS.find(s=>s.id===editingId)?.visits || 0) : 0,
+  };
+  if(pendingHtml){
+    data.htmlFileName = pendingHtml.name;
+    data.htmlContent = pendingHtml.content;
+  } else if(!editingId){
+    data.htmlFileName = null;
+    data.htmlContent = null;
+  }
+  try{
+    if(editingId){
+      await updateDoc(doc(db, COL, editingId), data);
+      showToast('تم تحديث النظام بنجاح');
+    }else{
+      await setDoc(doc(db, COL, newId()), data);
+      showToast('تمت إضافة النظام بنجاح');
+    }
+    closeModal();
+  }catch(e){
+    console.error(e);
+    showToast('تعذّر حفظ النظام، حاول مجددًا');
+  }
+}
+
+async function toggleStatus(id){
+  const s = SYSTEMS.find(x=>x.id===id);
+  if(!s) return;
+  try{
+    await updateDoc(doc(db, COL, id), { status: s.status==='on' ? 'off' : 'on', updated: todayStr() });
+    showToast(`تم ${s.status==='on' ? 'تعطيل' : 'تفعيل'} "${s.name}"`);
+  }catch(e){ console.error(e); showToast('تعذّر تحديث الحالة'); }
+}
+
+async function deleteSystem(id){
+  const s = SYSTEMS.find(x=>x.id===id);
+  if(!s) return;
+  if(!confirm(`هل تريد حذف "${s.name}" نهائيًا؟`)) return;
+  try{
+    await deleteDoc(doc(db, COL, id));
+    showToast(`تم حذف "${s.name}"`);
+  }catch(e){ console.error(e); showToast('تعذّر حذف النظام'); }
+}
+
+/* ---------------- Event wiring ---------------- */
+document.getElementById('searchInput').addEventListener('input', e=>{
+  filters.q = e.target.value.trim();
+  renderTable();
+});
+document.getElementById('categorySelect').addEventListener('change', e=>{
+  filters.category = e.target.value;
+  renderTable();
+});
+document.getElementById('statusChips').addEventListener('click', e=>{
+  const btn = e.target.closest('.chip');
+  if(!btn) return;
+  document.querySelectorAll('#statusChips .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  filters.status = btn.dataset.status;
+  renderTable();
+});
+document.getElementById('logoutLink').addEventListener('click', e=>{
+  e.preventDefault();
+  showToast('تم تسجيل الخروج (عرض توضيحي)');
+});
+document.getElementById('f_html').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    if(reader.result.length > MAX_HTML_SIZE){
+      alert('حجم الملف كبير جدًا للتخزين (الحد الأقصى تقريبًا 900 كيلوبايت). استخدم رابط الموقع بدلاً من ذلك.');
+      e.target.value = '';
+      return;
+    }
+    pendingHtml = { name:file.name, content:reader.result };
+    document.getElementById('f_html_hint').textContent = `تم اختيار: ${file.name}`;
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('refreshBtn').addEventListener('click', ()=>{
+  fillCategorySelect();
+  renderStats();
+  renderTable();
+  showToast('تم تحديث الصفحة ✓');
+});
+
+document.getElementById('closeBtn').addEventListener('click', ()=>{
+  showToast('يمكنك إغلاق النافذة الآن');
+  window.close();
+});
+
+document.getElementById('addSystemBtn').addEventListener('click', ()=>openModal(null));
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalCancel').addEventListener('click', closeModal);
+document.getElementById('modalSave').addEventListener('click', saveModal);
+document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay') closeModal(); });
+
+document.getElementById('tableBody').addEventListener('click', e=>{
+  const openBtn = e.target.closest('[data-open]');
+  const toggleBtn = e.target.closest('[data-toggle]');
+  const editBtn = e.target.closest('[data-edit]');
+  const delBtn = e.target.closest('[data-delete]');
+  if(openBtn){
+    e.preventDefault();
+    const s = SYSTEMS.find(x=>x.id===openBtn.dataset.id);
+    if(s && s.url && s.url!=='#'){
+      window.open(s.url, '_blank');
+    } else if(s && s.htmlContent){
+      const blob = new Blob([s.htmlContent], {type:'text/html'});
+      window.open(URL.createObjectURL(blob), '_blank');
+    } else {
+      showToast('لم يتم ربط رابط فعلي أو ملف HTML بهذا النظام بعد — عدّله لإضافته');
+    }
+    return;
+  }
+  if(toggleBtn) toggleStatus(toggleBtn.dataset.id);
+  if(editBtn) openModal(SYSTEMS.find(x=>x.id===editBtn.dataset.id));
+  if(delBtn) deleteSystem(delBtn.dataset.id);
+});
+
+/* ---------------- Boot ---------------- */
+ensureSeeded().then(subscribe);
+</script>
+</body>
+</html>

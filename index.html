@@ -53,6 +53,9 @@
   }
   .brand-text h1{font-size:19px;color:#fff;letter-spacing:.2px;}
   .brand-text p{margin:3px 0 0;color:#e8cfd6;font-size:12.5px;}
+  .sync-status{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#e8cfd6;margin-top:4px;}
+  .sync-dot{width:7px;height:7px;border-radius:50%;background:#6FCF97;flex-shrink:0;}
+  .sync-dot.off{background:#E29A9A;}
   .header-actions{display:flex;align-items:center;gap:16px;}
   .user-chip{
     display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.08);
@@ -190,6 +193,22 @@
   }
   .modal-body input:focus,.modal-body select:focus,.modal-body textarea:focus{outline:none;border-color:var(--maroon-soft);}
   .modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--line);}
+  .icon-choice{
+    width:38px;height:38px;border-radius:9px;border:1.5px solid var(--line);background:var(--paper);
+    font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;
+  }
+  .icon-choice:hover{border-color:var(--maroon-soft);}
+  .icon-choice.sel{border-color:var(--maroon);background:#fbeef1;box-shadow:0 0 0 2px rgba(122,16,41,.15) inset;}
+  .settings-section{border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+  .settings-section h4{font-size:13.5px;color:var(--maroon-2);margin:0 0 10px;font-family:'Cairo',sans-serif;}
+  .order-row, .cat-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .order-row:last-child, .cat-row:last-child{border-bottom:none;}
+  .order-row .nm, .cat-row .nm{flex:1;}
+  .mini-btn{
+    width:26px;height:26px;border-radius:6px;border:1.5px solid var(--line);background:var(--paper);
+    cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .mini-btn:hover{border-color:var(--maroon-soft);}
 
   footer{max-width:1200px;margin:30px auto 0;padding:18px 24px 0;border-top:1px solid var(--line);
     color:var(--muted);font-size:12px;text-align:center;}
@@ -213,19 +232,17 @@
 <header class="site-header">
   <div class="header-inner">
     <div class="brand">
-      <div class="seal">إ</div>
+      <div class="seal" id="brandSeal">إ</div>
       <div class="brand-text">
-        <h1>بوابة الأنظمة الإلكترونية</h1>
+        <h1 id="brandName">بوابة الأنظمة الإلكترونية</h1>
         <p>المنصة المركزية لإدارة روابط الأنظمة والمواقع الداخلية</p>
+        <div class="sync-status"><span class="sync-dot off" id="syncDot"></span><span id="syncLabel">جارِ الاتصال…</span></div>
       </div>
     </div>
     <div class="header-actions">
+      <button class="icon-btn" id="settingsBtn" title="الإعدادات">⚙️</button>
       <button class="icon-btn" id="refreshBtn" title="تحديث الصفحة">⟳</button>
       <button class="icon-btn" id="closeBtn" title="إغلاق">✕</button>
-      <div class="user-chip">
-        <div class="user-avatar">م</div>
-        <span>محمد العلي</span>
-      </div>
       <a href="#" class="logout-link" id="logoutLink">تسجيل الخروج</a>
     </div>
   </div>
@@ -284,10 +301,13 @@
     </div>
     <div class="modal-body">
       <div class="field"><label>اسم النظام</label><input type="text" id="f_name" placeholder="مثال: النظام المالي"></div>
-      <div class="field"><label>الأيقونة (رمز تعبيري)</label><input type="text" id="f_icon" placeholder="📁" maxlength="4"></div>
+      <div class="field">
+        <label>اختر الأيقونة الأنسب للبرنامج</label>
+        <div id="iconPicker" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        <input type="hidden" id="f_icon" value="📁">
+      </div>
       <div class="field"><label>التصنيف</label>
-        <input type="text" id="f_category" list="catList" placeholder="اختر أو اكتب تصنيفًا">
-        <datalist id="catList"></datalist>
+        <select id="f_category"></select>
       </div>
       <div class="field"><label>الوصف</label><textarea id="f_desc" rows="2" placeholder="وصف مختصر للنظام"></textarea></div>
       <div class="field"><label>رابط الدخول</label><input type="text" id="f_url" placeholder="https:// أو اسم صفحة داخل البوابة"></div>
@@ -310,35 +330,109 @@
 
 <div class="toast" id="toast"></div>
 
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-card" style="max-width:600px;">
+    <div class="modal-head">
+      <h3>⚙️ إعدادات البوابة</h3>
+      <button class="modal-close" id="settingsClose">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="settings-section">
+        <h4>اسم البوابة وأيقونتها</h4>
+        <div class="field"><label>اسم البوابة</label><input type="text" id="set_name" placeholder="بوابة الأنظمة الإلكترونية"></div>
+        <div class="field"><label>أيقونة/شعار البوابة (حرف أو رمز تعبيري)</label><input type="text" id="set_icon" maxlength="4" placeholder="إ"></div>
+        <button class="act-btn primary" id="saveBranding">حفظ اسم وأيقونة البوابة</button>
+      </div>
+
+      <div class="settings-section">
+        <h4>ترتيب الأنظمة في الجدول</h4>
+        <div id="orderList"></div>
+      </div>
+
+      <div class="settings-section">
+        <h4>إدارة التصنيفات</h4>
+        <div id="catManageList"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <input type="text" id="newCatIcon" maxlength="4" placeholder="🏷️" style="max-width:60px;padding:9px;border:1.5px solid var(--line);border-radius:8px;">
+          <input type="text" id="newCatName" placeholder="اسم تصنيف جديد" style="flex:1;padding:9px;border:1.5px solid var(--line);border-radius:8px;">
+          <button class="act-btn primary" id="addCatBtn">إضافة</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h4>كلمة مرور التعديل والحذف</h4>
+        <p style="font-size:12px;color:var(--muted);margin:0 0 10px;">عند تعيين كلمة مرور، لن يُسمح بتعديل أو حذف أي نظام إلا بعد إدخالها.</p>
+        <div class="field"><label>كلمة المرور الحالية (اتركها فارغة إن لم تُعيَّن من قبل)</label><input type="password" id="set_curpass"></div>
+        <div class="field"><label>كلمة المرور الجديدة</label><input type="password" id="set_newpass" placeholder="اتركها فارغة لإلغاء الحماية"></div>
+        <button class="act-btn primary" id="savePassword">حفظ كلمة المرور</button>
+      </div>
+
+    </div>
+    <div class="modal-foot"><button class="act-btn" id="settingsCloseBottom">إغلاق</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="gateModal">
+  <div class="modal-card" style="max-width:340px;">
+    <div class="modal-head"><h3>🔒 كلمة المرور مطلوبة</h3><button class="modal-close" id="gateClose">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>أدخل كلمة المرور للمتابعة</label><input type="password" id="gatePassInput"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="act-btn" id="gateCancel">إلغاء</button>
+      <button class="act-btn primary" id="gateSubmit">تأكيد</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
-/* ---------------- Firebase (Firestore) — same project as registration.html ---------------- */
+/* ---------------- Firebase (Firestore + Auth) — project: droub-55931 ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot
+  getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDKzYNTWD5d9aq1qNhRTSFFCsv6LEoDC0I",
-  authDomain: "tsgeel-d4004.firebaseapp.com",
-  projectId: "tsgeel-d4004",
-  storageBucket: "tsgeel-d4004.firebasestorage.app",
-  messagingSenderId: "261651902744",
-  appId: "1:261651902744:web:58fbad156c1aa293d82e6d",
-  measurementId: "G-RTGW6SHE6Y"
+  apiKey: "AIzaSyAYn7DzTC03I7Q_My7xuJD33ELQwwuhe84",
+  authDomain: "droub-55931.firebaseapp.com",
+  projectId: "droub-55931",
+  storageBucket: "droub-55931.firebasestorage.app",
+  messagingSenderId: "183460755575",
+  appId: "1:183460755575:web:86a743cb0349b6508b2e72",
+  measurementId: "G-1MC1V6QC4S"
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
+const auth = getAuth(fbApp);
 const COL = "portal_systems"; // one document per system/link shown on the portal home page
+const settingsDocRef = doc(db, "portal_meta", "config");
+const categoriesCol = collection(db, "portal_categories");
+
+let PORTAL_NAME = "بوابة الأنظمة الإلكترونية";
+let PORTAL_ICON = "إ";
+let ADMIN_PASSWORD = "";
+let CATS = []; // [{id, name, icon}]
+let pendingGateAction = null;
+
+const ICON_CHOICES = ["📁","📝","👥","💰","📊","🌐","🎓","🗂️","🏢","📋","⚙️","🏅","📄","🖥️","🔐","📚","🏦","⚖️","🚍","🩺","📦","🗓️","📈","🔔"];
+
+const DEFAULT_CATS = [
+  {name:"تسجيل الطلاب", icon:"🎓"}, {name:"الموارد البشرية", icon:"👥"}, {name:"مالي", icon:"💰"},
+  {name:"التقارير", icon:"📊"}, {name:"الخدمات الإلكترونية", icon:"🌐"}, {name:"البرامج التدريبية", icon:"🏅"},
+  {name:"إداري", icon:"🗂️"}, {name:"الأنظمة الداخلية", icon:"🏢"},
+];
 
 const SEED = [
-  { name:"تسجيل الطلاب", icon:"📝", category:"تسجيل الطلاب", desc:"إدارة طلبات التسجيل والقبول للبرامج والصفوف", status:"on", updated:"2026-07-27", url:"registration.html", visits:1284 },
-  { name:"إدارة الموارد البشرية", icon:"👥", category:"الموارد البشرية", desc:"ملفات الموظفين والإجازات والدوام", status:"on", updated:"2026-07-25", url:"#", visits:842 },
-  { name:"النظام المالي", icon:"💰", category:"مالي", desc:"المصروفات والميزانيات والتقارير المالية", status:"on", updated:"2026-07-20", url:"#", visits:611 },
-  { name:"بوابة التقارير الإدارية", icon:"📊", category:"التقارير", desc:"تقارير الأداء والمؤشرات الدورية", status:"on", updated:"2026-07-18", url:"#", visits:397 },
-  { name:"الخدمات الإلكترونية للعملاء", icon:"🌐", category:"الخدمات الإلكترونية", desc:"طلبات الخدمة الإلكترونية والمتابعة", status:"on", updated:"2026-07-15", url:"#", visits:2033 },
-  { name:"إدارة البرامج التدريبية", icon:"🎓", category:"البرامج التدريبية", desc:"جدولة الدورات التدريبية والمدربين", status:"off", updated:"2026-06-30", url:"#", visits:156 },
-  { name:"الأرشيف الإداري", icon:"🗂️", category:"إداري", desc:"حفظ ومتابعة المعاملات والمراسلات", status:"on", updated:"2026-07-10", url:"#", visits:289 },
-  { name:"الأنظمة الداخلية للمنشآت", icon:"🏢", category:"الأنظمة الداخلية", desc:"إدارة المرافق والصيانة الدورية", status:"off", updated:"2026-06-12", url:"#", visits:74 },
+  { name:"تسجيل الطلاب", icon:"📝", category:"تسجيل الطلاب", desc:"إدارة طلبات التسجيل والقبول للبرامج والصفوف", status:"on", updated:"2026-07-27", url:"registration.html", visits:1284, order:0 },
+  { name:"إدارة الموارد البشرية", icon:"👥", category:"الموارد البشرية", desc:"ملفات الموظفين والإجازات والدوام", status:"on", updated:"2026-07-25", url:"#", visits:842, order:1 },
+  { name:"النظام المالي", icon:"💰", category:"مالي", desc:"المصروفات والميزانيات والتقارير المالية", status:"on", updated:"2026-07-20", url:"#", visits:611, order:2 },
+  { name:"بوابة التقارير الإدارية", icon:"📊", category:"التقارير", desc:"تقارير الأداء والمؤشرات الدورية", status:"on", updated:"2026-07-18", url:"#", visits:397, order:3 },
+  { name:"الخدمات الإلكترونية للعملاء", icon:"🌐", category:"الخدمات الإلكترونية", desc:"طلبات الخدمة الإلكترونية والمتابعة", status:"on", updated:"2026-07-15", url:"#", visits:2033, order:4 },
+  { name:"إدارة البرامج التدريبية", icon:"🎓", category:"البرامج التدريبية", desc:"جدولة الدورات التدريبية والمدربين", status:"off", updated:"2026-06-30", url:"#", visits:156, order:5 },
+  { name:"الأرشيف الإداري", icon:"🗂️", category:"إداري", desc:"حفظ ومتابعة المعاملات والمراسلات", status:"on", updated:"2026-07-10", url:"#", visits:289, order:6 },
+  { name:"الأنظمة الداخلية للمنشآت", icon:"🏢", category:"الأنظمة الداخلية", desc:"إدارة المرافق والصيانة الدورية", status:"off", updated:"2026-06-12", url:"#", visits:74, order:7 },
 ];
 
 function newId(){ return "s" + Date.now() + Math.random().toString(36).slice(2,7); }
@@ -352,33 +446,80 @@ let pendingHtml = null; // {name, content} when a new HTML file is chosen in the
 const MAX_HTML_SIZE = 900000;
 
 async function ensureSeeded(){
-  const snap = await getDocs(collection(db, COL));
-  if(snap.empty){
-    await Promise.all(SEED.map(s => setDoc(doc(db, COL, newId()), s)));
+  try{
+    const snap = await getDocs(collection(db, COL));
+    if(snap.empty){
+      await Promise.all(SEED.map(s => setDoc(doc(db, COL, newId()), s)));
+    }
+    const catSnap = await getDocs(categoriesCol);
+    if(catSnap.empty){
+      await Promise.all(DEFAULT_CATS.map(c => addDoc(categoriesCol, c)));
+    }
+    const cfgSnap = await getDoc(settingsDocRef);
+    if(!cfgSnap.exists()){
+      await setDoc(settingsDocRef, {portalName: PORTAL_NAME, portalIcon: PORTAL_ICON, adminPassword: ""});
+    }
+  }catch(e){
+    console.error('ensureSeeded failed:', e);
+    showToast('تعذّر الاتصال بقاعدة البيانات عند بدء التشغيل — تحقق من قواعد Firestore Rules');
   }
 }
 
 function subscribe(){
   onSnapshot(collection(db, COL), snap=>{
-    SYSTEMS = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    SYSTEMS = snap.docs.map(d=>({ id:d.id, ...d.data() })).sort((a,b)=>(a.order??999)-(b.order??999));
     CATEGORIES = [...new Set(SYSTEMS.map(s=>s.category))];
     fillCategorySelect();
     renderStats();
     renderTable();
+    renderOrderList();
+    setSyncStatus(true, 'متزامن');
   }, err=>{
     console.error(err);
+    setSyncStatus(false, 'تعذّر الاتصال — تحقق من قواعد Firestore');
     showToast('تعذّر الاتصال بقاعدة البيانات، تحقق من الاتصال بالإنترنت');
   });
+
+  onSnapshot(settingsDocRef, snap=>{
+    if(snap.exists()){
+      const d = snap.data();
+      PORTAL_NAME = d.portalName || PORTAL_NAME;
+      PORTAL_ICON = d.portalIcon || PORTAL_ICON;
+      ADMIN_PASSWORD = d.adminPassword || "";
+      applyBranding();
+    }
+  }, err=> console.error(err));
+
+  onSnapshot(categoriesCol, snap=>{
+    CATS = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    fillCategorySelect();
+    renderCatManageList();
+  }, err=> console.error(err));
+}
+
+function applyBranding(){
+  document.getElementById('brandSeal').textContent = PORTAL_ICON;
+  document.getElementById('brandName').textContent = PORTAL_NAME;
+  document.title = PORTAL_NAME;
+}
+
+function setSyncStatus(ok, label){
+  document.getElementById('syncDot').classList.toggle('off', !ok);
+  document.getElementById('syncLabel').textContent = label;
 }
 
 function fillCategorySelect(){
   const sel = document.getElementById('categorySelect');
   const current = sel.value || "all";
+  const names = CATS.length ? CATS.map(c=>c.name) : CATEGORIES;
   sel.innerHTML = `<option value="all">كل التصنيفات</option>` +
-    CATEGORIES.map(c=>`<option value="${c}">${c}</option>`).join("");
-  sel.value = CATEGORIES.includes(current) ? current : "all";
+    names.map(c=>`<option value="${c}">${c}</option>`).join("");
+  sel.value = names.includes(current) ? current : "all";
 
-  document.getElementById('catList').innerHTML = CATEGORIES.map(c=>`<option value="${c}">`).join("");
+  const fcat = document.getElementById('f_category');
+  const fcatCurrent = fcat.value;
+  fcat.innerHTML = CATS.map(c=>`<option value="${esc(c.name)}">${esc(c.icon||'')} ${esc(c.name)}</option>`).join("");
+  if(names.includes(fcatCurrent)) fcat.value = fcatCurrent;
 }
 
 function renderStats(){
@@ -412,6 +553,62 @@ function getFiltered(){
 
 function esc(str){
   return String(str||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function renderOrderList(){
+  const wrap = document.getElementById('orderList');
+  if(!wrap) return;
+  if(!SYSTEMS.length){ wrap.innerHTML = `<div style="color:var(--muted);font-size:12.5px;">لا توجد أنظمة بعد</div>`; return; }
+  wrap.innerHTML = SYSTEMS.map((s,i)=>`
+    <div class="order-row">
+      <span>${esc(s.icon)||'📁'}</span>
+      <span class="nm">${esc(s.name)}</span>
+      <button class="mini-btn" data-up="${s.id}" ${i===0?'disabled':''} title="تحريك للأعلى">↑</button>
+      <button class="mini-btn" data-down="${s.id}" ${i===SYSTEMS.length-1?'disabled':''} title="تحريك للأسفل">↓</button>
+    </div>`).join('');
+  wrap.querySelectorAll('[data-up]').forEach(btn=> btn.onclick = ()=> moveSystem(btn.dataset.up, -1));
+  wrap.querySelectorAll('[data-down]').forEach(btn=> btn.onclick = ()=> moveSystem(btn.dataset.down, 1));
+}
+async function moveSystem(id, dir){
+  const idx = SYSTEMS.findIndex(s=>s.id===id);
+  const swapIdx = idx + dir;
+  if(idx<0 || swapIdx<0 || swapIdx>=SYSTEMS.length) return;
+  const a = SYSTEMS[idx], b = SYSTEMS[swapIdx];
+  const aOrder = a.order ?? idx, bOrder = b.order ?? swapIdx;
+  try{
+    await updateDoc(doc(db, COL, a.id), {order: bOrder});
+    await updateDoc(doc(db, COL, b.id), {order: aOrder});
+  }catch(e){ console.error(e); showToast('تعذّر تغيير الترتيب'); }
+}
+
+function renderCatManageList(){
+  const wrap = document.getElementById('catManageList');
+  if(!wrap) return;
+  if(!CATS.length){ wrap.innerHTML = `<div style="color:var(--muted);font-size:12.5px;">لا توجد تصنيفات بعد</div>`; return; }
+  wrap.innerHTML = CATS.map(c=>`
+    <div class="cat-row">
+      <span>${esc(c.icon)||'🏷️'}</span>
+      <span class="nm">${esc(c.name)}</span>
+      <button class="mini-btn" data-editcat="${c.id}" title="تعديل">✎</button>
+      <button class="mini-btn" data-delcat="${c.id}" title="حذف">🗑️</button>
+    </div>`).join('');
+  wrap.querySelectorAll('[data-editcat]').forEach(btn=>{
+    btn.onclick = ()=> requireGate(async ()=>{
+      const c = CATS.find(x=>x.id===btn.dataset.editcat); if(!c) return;
+      const newName = prompt('اسم التصنيف:', c.name); if(newName===null) return;
+      const newIcon = prompt('أيقونة التصنيف (رمز تعبيري):', c.icon||'🏷️'); if(newIcon===null) return;
+      try{ await updateDoc(doc(db,'portal_categories', c.id), {name:newName.trim()||c.name, icon:newIcon.trim()||'🏷️'}); showToast('تم تحديث التصنيف'); }
+      catch(e){ console.error(e); showToast('تعذّر تحديث التصنيف'); }
+    });
+  });
+  wrap.querySelectorAll('[data-delcat]').forEach(btn=>{
+    btn.onclick = ()=> requireGate(async ()=>{
+      const c = CATS.find(x=>x.id===btn.dataset.delcat); if(!c) return;
+      if(!confirm(`حذف تصنيف "${c.name}"؟ (لن يؤثر على الأنظمة المستخدمة له حاليًا)`)) return;
+      try{ await deleteDoc(doc(db,'portal_categories', c.id)); showToast('تم حذف التصنيف'); }
+      catch(e){ console.error(e); showToast('تعذّر حذف التصنيف'); }
+    });
+  });
 }
 
 function renderTable(){
@@ -463,7 +660,7 @@ function openModal(system){
   pendingHtml = null;
   document.getElementById('modalTitle').textContent = system ? "تعديل النظام" : "إضافة نظام جديد";
   document.getElementById('f_name').value = system?.name || "";
-  document.getElementById('f_icon').value = system?.icon || "📁";
+  renderIconPicker(system?.icon || "📁");
   document.getElementById('f_category').value = system?.category || "";
   document.getElementById('f_desc').value = system?.desc || "";
   document.getElementById('f_url').value = system?.url && system.url!=='#' ? system.url : "";
@@ -471,6 +668,18 @@ function openModal(system){
   document.getElementById('f_html').value = "";
   document.getElementById('f_html_hint').textContent = system?.htmlFileName ? `يوجد ملف مرفق حاليًا: ${system.htmlFileName} — اختر ملفًا جديدًا لاستبداله` : "";
   document.getElementById('modalOverlay').classList.add('show');
+}
+function renderIconPicker(selected){
+  document.getElementById('f_icon').value = selected;
+  const wrap = document.getElementById('iconPicker');
+  wrap.innerHTML = ICON_CHOICES.map(ic=>`<button type="button" class="icon-choice ${ic===selected?'sel':''}" data-ic="${ic}">${ic}</button>`).join('');
+  wrap.querySelectorAll('.icon-choice').forEach(btn=>{
+    btn.onclick = ()=>{
+      document.getElementById('f_icon').value = btn.dataset.ic;
+      wrap.querySelectorAll('.icon-choice').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+    };
+  });
 }
 function closeModal(){
   document.getElementById('modalOverlay').classList.remove('show');
@@ -490,6 +699,7 @@ async function saveModal(){
     status: document.getElementById('f_status').value,
     updated: todayStr(),
     visits: editingId ? (SYSTEMS.find(s=>s.id===editingId)?.visits || 0) : 0,
+    order: editingId ? (SYSTEMS.find(s=>s.id===editingId)?.order ?? 999) : (SYSTEMS.length ? Math.max(...SYSTEMS.map(s=>s.order??0))+1 : 0),
   };
   if(pendingHtml){
     data.htmlFileName = pendingHtml.name;
@@ -606,12 +816,97 @@ document.getElementById('tableBody').addEventListener('click', e=>{
     return;
   }
   if(toggleBtn) toggleStatus(toggleBtn.dataset.id);
-  if(editBtn) openModal(SYSTEMS.find(x=>x.id===editBtn.dataset.id));
-  if(delBtn) deleteSystem(delBtn.dataset.id);
+  if(editBtn) requireGate(()=> openModal(SYSTEMS.find(x=>x.id===editBtn.dataset.id)));
+  if(delBtn) requireGate(()=> deleteSystem(delBtn.dataset.id));
+});
+
+/* ---------------- Password gate for edit/delete ---------------- */
+function requireGate(action){
+  if(!ADMIN_PASSWORD){ action(); return; } // no password set yet — no protection needed
+  if(sessionStorage.getItem('gate_unlocked')==='1'){ action(); return; }
+  pendingGateAction = action;
+  document.getElementById('gatePassInput').value = '';
+  document.getElementById('gateModal').classList.add('show');
+  setTimeout(()=> document.getElementById('gatePassInput').focus(), 50);
+}
+document.getElementById('gateClose').addEventListener('click', ()=>{ document.getElementById('gateModal').classList.remove('show'); pendingGateAction=null; });
+document.getElementById('gateCancel').addEventListener('click', ()=>{ document.getElementById('gateModal').classList.remove('show'); pendingGateAction=null; });
+document.getElementById('gateSubmit').addEventListener('click', ()=>{
+  const val = document.getElementById('gatePassInput').value;
+  if(val === ADMIN_PASSWORD){
+    sessionStorage.setItem('gate_unlocked','1');
+    document.getElementById('gateModal').classList.remove('show');
+    const act = pendingGateAction; pendingGateAction=null;
+    if(act) act();
+  } else { showToast('كلمة المرور غير صحيحة'); }
+});
+document.getElementById('gatePassInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('gateSubmit').click(); });
+
+/* ---------------- Settings modal ---------------- */
+document.getElementById('settingsBtn').addEventListener('click', ()=>{
+  document.getElementById('set_name').value = PORTAL_NAME;
+  document.getElementById('set_icon').value = PORTAL_ICON;
+  document.getElementById('set_curpass').value = '';
+  document.getElementById('set_newpass').value = '';
+  renderOrderList();
+  renderCatManageList();
+  document.getElementById('settingsModal').classList.add('show');
+});
+function closeSettings(){ document.getElementById('settingsModal').classList.remove('show'); }
+document.getElementById('settingsClose').addEventListener('click', closeSettings);
+document.getElementById('settingsCloseBottom').addEventListener('click', closeSettings);
+document.getElementById('settingsModal').addEventListener('click', e=>{ if(e.target.id==='settingsModal') closeSettings(); });
+
+document.getElementById('saveBranding').addEventListener('click', async ()=>{
+  const name = document.getElementById('set_name').value.trim() || PORTAL_NAME;
+  const icon = document.getElementById('set_icon').value.trim() || PORTAL_ICON;
+  try{
+    await setDoc(settingsDocRef, {portalName:name, portalIcon:icon}, {merge:true});
+    showToast('تم حفظ اسم وأيقونة البوابة ✓');
+  }catch(e){ console.error(e); showToast('تعذّر الحفظ'); }
+});
+
+document.getElementById('addCatBtn').addEventListener('click', ()=> requireGate(async ()=>{
+  const name = document.getElementById('newCatName').value.trim();
+  const icon = document.getElementById('newCatIcon').value.trim() || '🏷️';
+  if(!name){ showToast('أدخل اسم التصنيف'); return; }
+  try{
+    await addDoc(categoriesCol, {name, icon});
+    document.getElementById('newCatName').value = '';
+    document.getElementById('newCatIcon').value = '';
+    showToast('تمت إضافة التصنيف ✓');
+  }catch(e){ console.error(e); showToast('تعذّر إضافة التصنيف'); }
+}));
+
+document.getElementById('savePassword').addEventListener('click', async ()=>{
+  const cur = document.getElementById('set_curpass').value;
+  const next = document.getElementById('set_newpass').value;
+  if(ADMIN_PASSWORD && cur !== ADMIN_PASSWORD){ showToast('كلمة المرور الحالية غير صحيحة'); return; }
+  try{
+    await setDoc(settingsDocRef, {adminPassword: next}, {merge:true});
+    sessionStorage.removeItem('gate_unlocked');
+    showToast(next ? 'تم تفعيل حماية التعديل/الحذف بكلمة المرور ✓' : 'تم إلغاء حماية التعديل/الحذف ✓');
+    document.getElementById('set_curpass').value = '';
+    document.getElementById('set_newpass').value = '';
+  }catch(e){ console.error(e); showToast('تعذّر حفظ كلمة المرور'); }
 });
 
 /* ---------------- Boot ---------------- */
-ensureSeeded().then(subscribe);
+renderStats();
+renderTable();
+function bootData(){
+  ensureSeeded().then(subscribe).catch(e=>{
+    console.error('Boot failed:', e);
+    setSyncStatus(false, 'تعذّر بدء التشغيل');
+    showToast('تعذّر بدء تشغيل البوابة — تحقق من الاتصال بقاعدة البيانات');
+    subscribe(); // still attempt live sync in case this was transient
+  });
+}
+signInAnonymously(auth).then(bootData).catch(e=>{
+  console.error('Anonymous sign-in failed:', e);
+  showToast('تنبيه: تسجيل الدخول المجهول غير مفعّل من Firebase Console — إن كانت قواعد Firestore لا تزال مفتوحة فالبوابة ستعمل بشكل طبيعي رغم ذلك');
+  bootData(); // proceed anyway — this only truly blocks things once Firestore rules require auth
+});
 </script>
 </body>
 </html>

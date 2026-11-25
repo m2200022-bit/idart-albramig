@@ -123,6 +123,12 @@ table{border-collapse:collapse;width:100%}
 .cA .rows tbody tr:hover{transform:translateY(-1px)}
 .cA .rows tbody tr.is-off td:not(.c-num){opacity:.62}
 /* رقم السطر */
+.cA .c-num span{display:block}
+.cA .mv{display:grid;place-items:center;width:30px;height:22px;margin:2px auto;border:0;border-radius:6px;background:rgba(255,255,255,.14);color:#fff;cursor:pointer}
+.cA .mv:hover:not(:disabled){background:var(--a-gold);color:#2a1a1e}
+.cA .mv:disabled{opacity:.25;cursor:default}
+.cA .mv .ic{width:16px;height:16px;stroke-width:2.5}
+.cA .move-hint{font-size:12px;color:var(--a-muted);padding:8px 16px 0}
 .cA .c-num{width:66px;padding:0!important;text-align:center;color:#fff;background:linear-gradient(160deg,var(--a-maroon),var(--a-maroon-d))!important;border-color:transparent!important;font-family:var(--f-kufi);font-size:19px;font-weight:800;letter-spacing:.02em}
 /* اسم النظام */
 .cA .c-name{min-width:280px}
@@ -416,7 +422,9 @@ const SVG = {
   power:'<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/>',
   trash:'<path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>',
   grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
-  plus:'<path d="M12 5v14M5 12h14"/>'
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  up:'<path d="m6 15 6-6 6 6"/>',
+  down:'<path d="m6 9 6 6 6-6"/>'
 };
 /* الأنظمة المخزّنة تحفظ رمزًا تعبيريًا؛ نعرض مقابله الخطي */
 const EMOJI_MAP = {"📁":"folder","📝":"pen","👥":"users","💰":"wallet","📊":"chart","🌐":"globe","🎓":"cap","🗂":"archive","🏢":"building","📋":"clipboard","⚙":"cog","🏅":"award","📄":"file","🖥":"monitor","🔐":"lock","📚":"library","🏦":"landmark","⚖":"scale","🚍":"bus","🩺":"steth","📦":"box","🗓":"calendar","📅":"calendar","📈":"trend","🔔":"bell","🕌":"mosque","📖":"book","🧭":"compass","🖼":"image","🏷":"tag"};
@@ -594,7 +602,6 @@ function viewMerged(rows){
     <div class="tools">
       <div class="chips">${['all',...cats].map(c=>`<button type="button" data-cat="${esc(c)}" aria-pressed="${filters.category===c}">${c==='all'?ic('grid')+'جميع الأنظمة':`${sysIcon(catIcon(c),'tag')}${esc(c)}`}<span class="num">${fmt(c==='all'?visible.length:visible.filter(s=>s.category===c).length)}</span></button>`).join('')}</div>
       <div class="right">
-        <label class="searchbox">${ic('search')}<input id="q" type="search" placeholder="ابحث باسم النظام أو وصفه" value="${esc(filters.q)}"><kbd>/</kbd></label>
         ${addBtn()}
       </div>
     </div>
@@ -602,10 +609,11 @@ function viewMerged(rows){
       ${QUICK.map(([k,l])=>`<button type="button" data-quick="${k}" aria-pressed="${filters.quick===k}">${l}</button>`).join('')}
       ${isUnlocked()?`<span class="sep"></span>${[['all','كل الحالات'],['on','المتاحة'],['off','المعطّلة']].map(([k,l])=>`<button type="button" data-status="${k}" aria-pressed="${filters.status===k}">${l}</button>`).join('')}`:''}
     </div>
+    ${isUnlocked() && !canMove() ? `<div class="move-hint">لتغيير ترتيب الأنظمة بالأسهم، اختر تبويب «الكل» وألغِ الفرز بالضغط على العمود مرة ثالثة.</div>`:''}
     <div class="rows-wrap scroll"><table class="rows">
       <thead><tr><th>م</th>${th('name','النظام')}<th></th>${th('status','الحالة')}${th('lastOpened','آخر استخدام')}<th></th>${th('visits','الزيارات')}</tr></thead>
       <tbody>${rows.length ? rows.map((s,i)=>`<tr class="${s.status==='on'?'':'is-off'}">
-        <td class="c-num num">${pad(i+1)}</td>
+        <td class="c-num num">${canMove()?`<button type="button" class="mv" data-move="-1" data-id="${s.id}" title="رفع سطر للأعلى" ${i===0?'disabled':''}>${ic('up')}</button>`:''}<span>${pad(i+1)}</span>${canMove()?`<button type="button" class="mv" data-move="1" data-id="${s.id}" title="إنزال سطر للأسفل" ${i===rows.length-1?'disabled':''}>${ic('down')}</button>`:''}</td>
         <td class="c-name">
           <div class="ttl"><a class="nm" ${openAttrs(s)} title="${openLabel(s)}">${esc(s.name)}</a>${favBtn(s)}</div>
           ${s.desc?`<div class="sub">${ic('file')}<span>${esc(s.desc)}</span></div>`:''}
@@ -657,6 +665,22 @@ function renderOrderList(){
     </div>`).join('');
   wrap.querySelectorAll('[data-up]').forEach(btn=> btn.onclick = ()=> moveSystem(btn.dataset.up, -1));
   wrap.querySelectorAll('[data-down]').forEach(btn=> btn.onclick = ()=> moveSystem(btn.dataset.down, 1));
+}
+function canMove(){ return isUnlocked() && !filters.sort.k && filters.quick==='all'; }
+async function moveRow(id, dir){
+  const rows = getFiltered();
+  const i = rows.findIndex(r=>r.id===id), j = i + dir;
+  if(i<0 || j<0 || j>=rows.length) return;
+  const before = new Map(SYSTEMS.map((s,k)=>[s.id, s.order]));
+  const list = [...SYSTEMS];
+  const a = list.findIndex(s=>s.id===rows[i].id), b = list.findIndex(s=>s.id===rows[j].id);
+  [list[a], list[b]] = [list[b], list[a]];
+  list.forEach((s,k)=>{ s.order = k; });
+  SYSTEMS = list;
+  renderTable(); renderOrderList();
+  const changed = list.filter(s=>before.get(s.id)!==s.order);
+  try{ await Promise.all(changed.map(s=>updateDoc(doc(db, COL, s.id), {order:s.order}))); }
+  catch(e){ console.error(e); showToast('تعذّر حفظ الترتيب، حاول مجددًا'); }
 }
 async function moveSystem(id, dir){
   const idx = SYSTEMS.findIndex(s=>s.id===id);
@@ -804,6 +828,7 @@ stage.addEventListener('change', e=>{
 stage.addEventListener('click', e=>{
   const el = sel => e.target.closest(sel);
   let b;
+  if((b = el('[data-move]'))){ if(!b.disabled){ const id=b.dataset.id, d=+b.dataset.move; requireGate(()=> moveRow(id, d)); } return; }
   if((b = el('[data-open]'))){ e.preventDefault(); openSystemById(b.dataset.id); return; }
   if((b = el('[data-fav]'))){
     const s = SYSTEMS.find(x=>x.id===b.dataset.fav);
@@ -815,7 +840,8 @@ stage.addEventListener('click', e=>{
   if((b = el('[data-status]'))){ filters.status = b.dataset.status; renderTable(); return; }
   if((b = el('th[data-sort]'))){
     const k = b.dataset.sort;
-    filters.sort = filters.sort.k===k ? {k, dir:-filters.sort.dir} : {k, dir:(k==='visits'||k==='updated')?-1:1};
+    const d0 = (k==='visits'||k==='updated'||k==='lastOpened')?-1:1;
+    filters.sort = filters.sort.k!==k ? {k, dir:d0} : (filters.sort.dir===d0 ? {k, dir:-d0} : {k:null, dir:1});
     renderTable(); return;
   }
   if(el('[data-add]')){ openModal(null); return; }

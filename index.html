@@ -59,10 +59,10 @@ table{border-collapse:collapse;width:100%}
 .add-btn{font-size:12.5px;font-weight:600;border:0;background:var(--ui-accent);color:var(--ui-on);padding:7px 14px;border-radius:6px;cursor:pointer;white-space:nowrap}
 
 /* ============ الهوية الموحّدة: العنّابي الرسمي + لوحة التشغيل ============ */
-.cA{--a-bg:#faf7f6;--a-surface:#ffffff;--a-ink:#2a1a1e;--a-muted:#7a666b;--a-line:#ecdfe1;--a-zebra:#fbf6f7;--a-soft:#f5e7eb;--a-maroon:#8a1538;--a-maroon-d:#5e0d26;--a-on:#ffffff;--a-gold:#b8925a;
+.cA{--a-bg:#faf7f6;--a-surface:#ffffff;--a-ink:#2a1a1e;--a-muted:#7a666b;--a-line:#ecdfe1;--a-zebra:#fbf6f7;--a-soft:#f5e7eb;--a-maroon-soft:#d9b9c2;--a-maroon:#8a1538;--a-maroon-d:#5e0d26;--a-on:#ffffff;--a-gold:#b8925a;
   background:var(--a-bg);color:var(--a-ink);border:1px solid var(--a-line);border-radius:4px;overflow:hidden}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cA{--a-bg:#1a1214;--a-surface:#22181b;--a-ink:#f3e9eb;--a-muted:#b59fa5;--a-line:#3a2a2f;--a-zebra:#261b1e;--a-soft:#3a1e26;--a-maroon:#b8325a;--a-maroon-d:#4a0b1e;--a-gold:#d4b07a}}
-:root[data-theme="dark"] .cA{--a-bg:#1a1214;--a-surface:#22181b;--a-ink:#f3e9eb;--a-muted:#b59fa5;--a-line:#3a2a2f;--a-zebra:#261b1e;--a-soft:#3a1e26;--a-maroon:#b8325a;--a-maroon-d:#4a0b1e;--a-gold:#d4b07a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cA{--a-bg:#1a1214;--a-surface:#22181b;--a-ink:#f3e9eb;--a-muted:#b59fa5;--a-line:#3a2a2f;--a-zebra:#261b1e;--a-soft:#3a1e26;--a-maroon-soft:#6a3442;--a-maroon:#b8325a;--a-maroon-d:#4a0b1e;--a-gold:#d4b07a}}
+:root[data-theme="dark"] .cA{--a-bg:#1a1214;--a-surface:#22181b;--a-ink:#f3e9eb;--a-muted:#b59fa5;--a-line:#3a2a2f;--a-zebra:#261b1e;--a-soft:#3a1e26;--a-maroon-soft:#6a3442;--a-maroon:#b8325a;--a-maroon-d:#4a0b1e;--a-gold:#d4b07a}
 
 /* الشريط العلوي */
 .cA .band{background:var(--a-maroon-d);color:#fff;padding:20px 24px 26px;display:flex;flex-direction:column;gap:18px;position:relative}
@@ -103,35 +103,72 @@ table{border-collapse:collapse;width:100%}
 .cA .tabs .sep{width:1px;background:var(--a-line);margin:8px 0}
 
 /* الجدول */
-.cA table{min-width:900px;background:var(--a-surface)}
-.cA thead th{background:var(--a-maroon);color:var(--a-on);font-weight:600;font-size:12.5px;text-align:start;padding:11px 14px;white-space:nowrap;user-select:none}
-.cA thead th[data-sort]{cursor:pointer}
-.cA thead th[data-sort]:hover{background:var(--a-maroon-d)}
-.cA thead th .arr{opacity:.45;margin-inline-start:5px;font-size:10px}
-.cA thead th.sorted .arr{opacity:1;color:var(--a-gold)}
-.cA tbody td{padding:10px 14px;border-bottom:1px solid var(--a-line);vertical-align:middle}
-.cA tbody tr:nth-child(even){background:var(--a-zebra)}
-.cA tbody tr:hover{box-shadow:inset -3px 0 0 var(--a-maroon)}
-.cA tbody tr.is-off{opacity:.7}
-.cA .idx{color:var(--a-muted);font-family:var(--f-kufi);font-size:12px;width:40px}
-.cA .sysc{display:flex;gap:10px;align-items:center;min-width:240px}
-.cA .ini{width:34px;height:34px;border-radius:6px;display:grid;place-items:center;background:var(--a-soft);flex-shrink:0}
-.cA .nm{font-weight:600;color:var(--a-ink);text-decoration:none;display:inline-block}
-.cA .nm:hover{color:var(--a-maroon);text-decoration:underline;text-underline-offset:3px}
-.cA a.ini{text-decoration:none}
-.cA a.ini:hover{background:var(--a-maroon)}
-.cA .ds{color:var(--a-muted);font-size:12px}
-.cA .cat{font-size:12px;color:var(--a-ink);border:1px solid var(--a-line);border-radius:2px;padding:1px 8px;white-space:nowrap;background:var(--a-bg)}
-.cA .bar{display:flex;align-items:center;gap:8px;min-width:130px}
-.cA .bar i{display:block;height:6px;border-radius:1px;background:var(--a-maroon);opacity:.85}
-.cA .bar span{font-size:12px;color:var(--a-muted)}
-.cA .acts{display:flex;gap:4px;justify-content:flex-end;align-items:center}
+.cA{--a-sand:#f7efe2;--a-sand-2:#efe2cb;--a-sand-ink:#5a4326;--a-wa:#25a244}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .cA{--a-sand:#2e2419;--a-sand-2:#3a2d1e;--a-sand-ink:#ecd6b0;--a-wa:#4ade80}}
+:root[data-theme="dark"] .cA{--a-sand:#2e2419;--a-sand-2:#3a2d1e;--a-sand-ink:#ecd6b0;--a-wa:#4ade80}
+.cA .rows-wrap{padding:6px 16px 4px}
+.cA table.rows{min-width:1000px;border-collapse:separate;border-spacing:0 10px}
+.cA .rows thead th{font-size:11.5px;font-weight:500;color:var(--a-muted);text-align:start;padding:6px 16px 0;white-space:nowrap;user-select:none;background:transparent}
+.cA .rows thead th[data-sort]{cursor:pointer}
+.cA .rows thead th[data-sort]:hover{color:var(--a-maroon)}
+.cA .rows thead th .arr{opacity:.4;margin-inline-start:4px;font-size:10px}
+.cA .rows thead th.sorted{color:var(--a-maroon);font-weight:600}
+.cA .rows thead th.sorted .arr{opacity:1}
+.cA .rows tbody td{background:var(--a-surface);border-top:1px solid var(--a-line);border-bottom:1px solid var(--a-line);padding:14px 18px;vertical-align:middle}
+.cA .rows tbody td+td{border-inline-start:1px solid var(--a-line)}
+.cA .rows tbody td:first-child{border-inline-start:0;border-start-start-radius:10px;border-end-start-radius:10px}
+.cA .rows tbody td:last-child{border-inline-end:1px solid var(--a-line);border-start-end-radius:10px;border-end-end-radius:10px}
+.cA .rows tbody tr{transition:transform .15s}
+.cA .rows tbody tr:hover td{border-color:var(--a-maroon-soft,#d9b9c2)}
+.cA .rows tbody tr:hover{transform:translateY(-1px)}
+.cA .rows tbody tr.is-off td:not(.c-num){opacity:.62}
+/* رقم السطر */
+.cA .c-num{width:66px;padding:0!important;text-align:center;color:#fff;background:linear-gradient(160deg,var(--a-maroon),var(--a-maroon-d))!important;border-color:transparent!important;font-family:var(--f-kufi);font-size:19px;font-weight:800;letter-spacing:.02em}
+/* اسم النظام */
+.cA .c-name{min-width:280px}
+.cA .ttl{display:flex;align-items:center;gap:8px}
+.cA .nm{font-family:var(--f-kufi);font-size:16px;font-weight:700;color:var(--a-maroon);text-decoration:none;line-height:1.4}
+.cA .nm:hover{text-decoration:underline;text-underline-offset:4px}
+.cA .sub{display:flex;align-items:flex-start;gap:6px;margin-top:4px;font-size:13.5px;font-weight:600;color:var(--a-ink)}
+.cA .sub .ic{color:var(--a-gold);margin-top:3px}
+.cA .ds{color:var(--a-muted);font-size:12px;margin-top:3px}
+/* شعار النظام */
+.cA .c-logo{width:96px;text-align:center}
+.cA .logo{width:54px;height:54px;margin:auto;border-radius:12px;display:grid;place-items:center;background:var(--a-soft);color:var(--a-maroon);text-decoration:none;transition:background .15s,color .15s}
+.cA .logo .ic{width:26px;height:26px;stroke-width:1.7}
+.cA .logo .emo{font-size:24px}
+.cA a.logo:hover{background:var(--a-maroon);color:#fff}
+/* خلية المعلومات بأيقونة */
+.cA .line{display:flex;align-items:center;gap:7px;white-space:nowrap;font-size:13px}
+.cA .line+.line{margin-top:7px}
+.cA .line .ic{color:var(--a-gold)}
+.cA .line.strong{font-weight:700;color:var(--a-ink)}
+.cA .line.muted{color:var(--a-muted)}
+.cA .line.ok{color:var(--ok);font-weight:600}.cA .line.ok .ic{color:var(--ok)}
+.cA .line.off{color:var(--off);font-weight:600}.cA .line.off .ic{color:var(--off)}
+/* الإجراءات */
+.cA .c-act{width:1%;white-space:nowrap}
+.cA .acts{display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap}
+.cA .open{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--a-maroon);color:var(--a-maroon);padding:7px 16px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:700;white-space:nowrap;background:var(--a-surface)}
+.cA .open:hover{background:var(--a-maroon);color:var(--a-on)}
+.cA .admin-row{display:flex;gap:4px;justify-content:center;margin-top:6px}
+.cA .mini{border-radius:8px;display:inline-flex;align-items:center;gap:4px}
 .cA .ghost{opacity:0;transition:opacity .15s}
 .cA tr:hover .ghost,.cA tr:focus-within .ghost{opacity:1}
 @media (hover:none){.cA .ghost{opacity:1}}
-.cA .mini{border-radius:2px}
-.cA .open{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--a-maroon);color:var(--a-maroon);padding:5px 12px;border-radius:2px;text-decoration:none;font-size:12.5px;font-weight:600;white-space:nowrap}
-.cA .open:hover{background:var(--a-maroon);color:var(--a-on)}
+/* خلية الزيارات */
+.cA .c-visits{width:96px;text-align:center;padding:10px 8px!important;background:linear-gradient(170deg,var(--a-sand),var(--a-sand-2))!important;color:var(--a-sand-ink);border-inline-start:1.5px dashed var(--a-gold)!important}
+.cA .c-visits .ic{width:17px;height:17px;opacity:.8}
+.cA .c-visits b{display:block;font-family:var(--f-kufi);font-size:22px;font-weight:800;line-height:1.2;color:var(--a-ink)}
+.cA .c-visits small{font-size:11.5px;font-weight:600}
+.cA .fav{color:var(--a-line);padding:0;display:inline-grid;place-items:center}
+.cA .fav .ic{width:17px;height:17px}
+.cA .fav.on{color:#d49b00}
+.cA .fav.on .ic{fill:currentColor}
+.cA .empty-row td{text-align:center;padding:30px!important;color:var(--a-muted);border-radius:10px!important;border-inline:1px solid var(--a-line)!important}
+.cA .chips .ic,.cA .tabs .ic{width:14px;height:14px;vertical-align:-2px}
+.cA .chips button{display:inline-flex;align-items:center;gap:6px}
+.cA .searchbox .ic{color:var(--a-muted)}
 .cA .foot{padding:12px 24px;color:var(--a-muted);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 @media (max-width:760px){
   .cA .band,.cA .tools,.cA .foot{padding-inline:16px}
@@ -154,8 +191,10 @@ table{border-collapse:collapse;width:100%}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ui-accent);outline:none}
 .act-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:8px 14px;border-radius:7px;cursor:pointer;font-size:13px;text-decoration:none}
 .act-btn.primary{background:var(--ui-accent);color:var(--ui-on);border-color:var(--ui-accent);font-weight:600}
-.icon-choice{width:36px;height:36px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);font-size:18px;cursor:pointer}
-.icon-choice.sel{border-color:var(--ui-accent);background:var(--surface);box-shadow:0 0 0 2px var(--ui-accent) inset}
+.icon-choice{width:40px;height:40px;border:1.5px solid var(--line);border-radius:9px;background:var(--bg);color:var(--fg);font-size:18px;cursor:pointer;display:grid;place-items:center}
+.icon-choice .ic{width:20px;height:20px}
+.icon-choice.sel{border-color:var(--ui-accent);background:var(--ui-accent);color:var(--ui-on)}
+.order-row .ic,.cat-row .ic{color:var(--ui-accent)}
 .settings-section{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px}
 .settings-section h4{margin:0;font-size:13.5px}
 .order-row,.cat-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13px}
@@ -316,7 +355,6 @@ let pendingGateAction = null;
 let SYNC = { ok:false, label:"جارِ الاتصال…" };
 let LOADED = false;
 
-const ICON_CHOICES = ["📁","📝","👥","💰","📊","🌐","🎓","🗂️","🏢","📋","⚙️","🏅","📄","🖥️","🔐","📚","🏦","⚖️","🚍","🩺","📦","🗓️","📈","🔔","🕌","📖","🧭","🖼️"];
 
 const DEFAULT_CATS = [
   {name:"تسجيل الطلاب", icon:"🎓"}, {name:"الموارد البشرية", icon:"👥"}, {name:"مالي", icon:"💰"},
@@ -334,9 +372,67 @@ const SEED = [
   { name:"الأنظمة الداخلية للمنشآت", icon:"🏢", category:"الأنظمة الداخلية", desc:"إدارة المرافق والصيانة الدورية", status:"off", updated:"2026-06-12", url:"#", visits:74, order:7 , favorite:false, createdAt:1754974800000 },
 ];
 
+
+/* ---------------- مكتبة الأيقونات (خطية موحّدة) ---------------- */
+const SVG = {
+  folder:'<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+  pen:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/>',
+  wallet:'<path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>',
+  chart:'<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+  globe:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"/>',
+  cap:'<path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/><path d="M22 10v6"/>',
+  archive:'<rect x="2" y="3" width="20" height="5" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+  building:'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/>',
+  clipboard:'<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h4"/>',
+  cog:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>',
+  award:'<circle cx="12" cy="8" r="6"/><path d="M15.5 12.9 17 22l-5-3-5 3 1.5-9.1"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/>',
+  monitor:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  library:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h8"/>',
+  landmark:'<path d="M3 22h18"/><path d="M6 18v-7M10 18v-7M14 18v-7M18 18v-7"/><path d="M12 2 21 7H3Z"/>',
+  scale:'<path d="M12 3v18M7 21h10M3 7h18"/><path d="m6 7-3 7a3 3 0 0 0 6 0Z"/><path d="m18 7-3 7a3 3 0 0 0 6 0Z"/>',
+  bus:'<rect x="4" y="3" width="16" height="15" rx="2"/><path d="M4 11h16M7 18v3M17 18v3"/><path d="M8 15h.01M16 15h.01"/>',
+  steth:'<path d="M5 3v6a5 5 0 0 0 10 0V3"/><path d="M10 14v2a5 5 0 0 0 10 0v-3"/><circle cx="20" cy="11" r="2"/>',
+  box:'<path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>',
+  calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  trend:'<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+  mosque:'<path d="M12 2v2"/><path d="M6.5 11a5.5 5.5 0 0 1 11 0"/><path d="M4 11h16v10H4z"/><path d="M10 21v-4a2 2 0 0 1 4 0v4"/><path d="M2 21h20"/>',
+  book:'<path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2Z"/><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7Z"/>',
+  compass:'<circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3Z"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
+  tag:'<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8Z"/><path d="M7.5 7.5h.01"/>',
+  /* أيقونات الواجهة */
+  eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  check:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+  ban:'<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>',
+  enter:'<path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/><path d="m14 17-5-5 5-5"/><path d="M9 12h12"/>',
+  star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  power:'<path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/>',
+  trash:'<path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>'
+};
+/* الأنظمة المخزّنة تحفظ رمزًا تعبيريًا؛ نعرض مقابله الخطي */
+const EMOJI_MAP = {"📁":"folder","📝":"pen","👥":"users","💰":"wallet","📊":"chart","🌐":"globe","🎓":"cap","🗂":"archive","🏢":"building","📋":"clipboard","⚙":"cog","🏅":"award","📄":"file","🖥":"monitor","🔐":"lock","📚":"library","🏦":"landmark","⚖":"scale","🚍":"bus","🩺":"steth","📦":"box","🗓":"calendar","📅":"calendar","📈":"trend","🔔":"bell","🕌":"mosque","📖":"book","🧭":"compass","🖼":"image","🏷":"tag"};
+function ic(name, cls=''){ return `<svg class="ic ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SVG[name]||SVG.folder}</svg>`; }
+function sysIcon(emoji, fallback='folder'){
+  const key = String(emoji||'').replace(/️/g,'').trim();
+  if(!key) return ic(fallback);
+  if(EMOJI_MAP[key]) return ic(EMOJI_MAP[key]);
+  if(SVG[key]) return ic(key);
+  return `<span class="emo">${esc(key)}</span>`;
+}
+
 function newId(){ return "s" + Date.now() + Math.random().toString(36).slice(2,7); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 
+const ICON_CHOICES = ["📁","🕌","📖","📋","🗓️","👥","💰","📊","📈","🌐","🎓","🗂️","🏢","⚙️","🏅","📄","🖥️","🔐","📚","🏦","⚖️","🚍","🩺","📦","🔔","🧭","🖼️","📝"];
 let SYSTEMS = [];
 let CATEGORIES = [];
 let filters = { q:"", category:"all", status:"all", quick:"all", sort:{k:null, dir:1} };
@@ -467,14 +563,14 @@ function totals(){
   return { all:SYSTEMS.length, on, off:SYSTEMS.length-on, cats:CATEGORIES.length, visits:SYSTEMS.reduce((a,s)=>a+(s.visits||0),0) };
 }
 const statusPill = s => `<span class="status ${s.status==='on'?'on':'off'}">${s.status==='on'?'متاح':'معطّل'}</span>`;
-const favBtn = s => `<button type="button" class="fav ${s.favorite?'on':''}" data-fav="${s.id}" title="مفضلة" aria-label="مفضلة">★</button>`;
+const favBtn = s => `<button type="button" class="fav ${s.favorite?'on':''}" data-fav="${s.id}" title="${s.favorite?'إزالة من المفضلة':'إضافة إلى المفضلة'}" aria-label="مفضلة">${ic('star')}</button>`;
 const openLabel = s => s.htmlContent && (!s.url || s.url==='#') ? 'فتح الملف' : 'فتح النظام';
 const openAttrs = s => `href="${esc(s.url)||'#'}" data-open data-id="${s.id}"`;
 const adminBtns = (s, cls='') => isUnlocked() ? `
-  <button type="button" class="mini ${cls}" data-toggle data-id="${s.id}">${s.status==='on'?'تعطيل':'تفعيل'}</button>
-  <button type="button" class="mini ${cls}" data-edit data-id="${s.id}">تعديل</button>
-  <button type="button" class="mini danger ${cls}" data-delete data-id="${s.id}">حذف</button>` : '';
-const addBtn = () => isUnlocked() ? `<button type="button" class="add-btn" data-add>+ إضافة نظام</button>` : '';
+  <button type="button" class="mini ${cls}" data-toggle data-id="${s.id}">${ic('power')}${s.status==='on'?'تعطيل':'تفعيل'}</button>
+  <button type="button" class="mini ${cls}" data-edit data-id="${s.id}">${ic('edit')}تعديل</button>
+  <button type="button" class="mini danger ${cls}" data-delete data-id="${s.id}">${ic('trash')}حذف</button>` : '';
+const addBtn = () => isUnlocked() ? `<button type="button" class="add-btn" data-add style="display:inline-flex;align-items:center;gap:6px">${ic('plus')}إضافة نظام</button>` : '';
 const emptyText = () => LOADED ? 'لا توجد أنظمة مطابقة' : 'جارِ تحميل الأنظمة…';
 const sync = () => `<span class="sync js-sync ${SYNC.ok?'':'off'}">${esc(SYNC.label)}</span>`;
 
@@ -492,13 +588,13 @@ function renderSummary(){
 function viewMerged(rows){
   const cats = catNames();
   const visible = SYSTEMS.filter(s=>isUnlocked() || s.status==='on');
-  const max = Math.max(1, ...SYSTEMS.map(s=>s.visits||0));
   const th = (k,l)=>`<th data-sort="${k}" tabindex="0" class="${filters.sort.k===k?'sorted':''}" title="فرز">${l}<span class="arr">${filters.sort.k===k?(filters.sort.dir>0?'▲':'▼'):'↕'}</span></th>`;
+  const pad = n => String(n).padStart(2,'0');
   return `
     <div class="tools">
-      <div class="chips">${['all',...cats].map(c=>`<button type="button" data-cat="${esc(c)}" aria-pressed="${filters.category===c}">${c==='all'?'جميع الأنظمة':`${esc(catIcon(c))} ${esc(c)}`}<span class="num">${fmt(c==='all'?visible.length:visible.filter(s=>s.category===c).length)}</span></button>`).join('')}</div>
+      <div class="chips">${['all',...cats].map(c=>`<button type="button" data-cat="${esc(c)}" aria-pressed="${filters.category===c}">${c==='all'?ic('grid')+'جميع الأنظمة':`${sysIcon(catIcon(c),'tag')}${esc(c)}`}<span class="num">${fmt(c==='all'?visible.length:visible.filter(s=>s.category===c).length)}</span></button>`).join('')}</div>
       <div class="right">
-        <label class="searchbox"><span aria-hidden="true">⌕</span><input id="q" type="search" placeholder="ابحث باسم النظام أو وصفه" value="${esc(filters.q)}"><kbd>/</kbd></label>
+        <label class="searchbox">${ic('search')}<input id="q" type="search" placeholder="ابحث باسم النظام أو وصفه" value="${esc(filters.q)}"><kbd>/</kbd></label>
         ${addBtn()}
       </div>
     </div>
@@ -506,20 +602,32 @@ function viewMerged(rows){
       ${QUICK.map(([k,l])=>`<button type="button" data-quick="${k}" aria-pressed="${filters.quick===k}">${l}</button>`).join('')}
       ${isUnlocked()?`<span class="sep"></span>${[['all','كل الحالات'],['on','المتاحة'],['off','المعطّلة']].map(([k,l])=>`<button type="button" data-status="${k}" aria-pressed="${filters.status===k}">${l}</button>`).join('')}`:''}
     </div>
-    <div class="scroll"><table>
-      <thead><tr><th>م</th><th style="width:32px"></th>${th('name','النظام')}${th('category','التصنيف')}${th('status','الحالة')}${th('visits','الاستخدام')}${th('updated','آخر تحديث')}<th></th></tr></thead>
+    <div class="rows-wrap scroll"><table class="rows">
+      <thead><tr><th>م</th>${th('name','النظام')}<th></th>${th('status','الحالة')}${th('lastOpened','آخر استخدام')}<th></th>${th('visits','الزيارات')}</tr></thead>
       <tbody>${rows.length ? rows.map((s,i)=>`<tr class="${s.status==='on'?'':'is-off'}">
-        <td class="idx num">${fmt(i+1)}</td>
-        <td>${favBtn(s)}</td>
-        <td><div class="sysc"><a class="ini emo" ${openAttrs(s)} tabindex="-1" aria-hidden="true">${esc(s.icon)||'📁'}</a><div><a class="nm" ${openAttrs(s)} title="${openLabel(s)}">${esc(s.name)}</a><div class="ds">${esc(s.desc)}${s.lastOpened?` · فُتح ${timeAgo(s.lastOpened)}`:''}</div></div></div></td>
-        <td><span class="cat">${esc(s.category)}</span></td>
-        <td>${statusPill(s)}</td>
-        <td><div class="bar"><i style="width:${Math.max(6, Math.round((s.visits||0)/max*80))}px"></i><span class="num">${fmt(s.visits)}</span></div></td>
-        <td class="num">${dateAr(s.updated)}</td>
-        <td><div class="acts">${adminBtns(s,'ghost')}<a class="open" ${openAttrs(s)}>${openLabel(s)} ←</a></div></td>
-      </tr>`).join('') : `<tr><td colspan="8" class="empty">${emptyText()}</td></tr>`}</tbody>
+        <td class="c-num num">${pad(i+1)}</td>
+        <td class="c-name">
+          <div class="ttl"><a class="nm" ${openAttrs(s)} title="${openLabel(s)}">${esc(s.name)}</a>${favBtn(s)}</div>
+          ${s.desc?`<div class="sub">${ic('file')}<span>${esc(s.desc)}</span></div>`:''}
+          <div class="ds">${esc(s.category)}</div>
+        </td>
+        <td class="c-logo"><a class="logo" ${openAttrs(s)} tabindex="-1" aria-hidden="true">${sysIcon(s.icon)}</a></td>
+        <td>
+          <div class="line ${s.status==='on'?'ok':'off'}">${ic(s.status==='on'?'check':'ban')}${s.status==='on'?'متاح للدخول':'معطّل مؤقتًا'}</div>
+          <div class="line muted">${ic(s.url&&s.url!=='#'?'globe':'file')}${s.url&&s.url!=='#'?'رابط إلكتروني':(s.htmlContent?'ملف مرفوع':'لا يوجد رابط')}</div>
+        </td>
+        <td>
+          <div class="line ${s.lastOpened?'strong':'muted'}">${ic('clock')}${s.lastOpened?`فُتح ${timeAgo(s.lastOpened)}`:'لم يُفتح بعد'}</div>
+          <div class="line muted">${ic('calendar')}آخر تحديث ${dateAr(s.updated)}</div>
+        </td>
+        <td class="c-act">
+          <div class="acts"><a class="open" ${openAttrs(s)}>${ic('enter')}${openLabel(s)==='فتح الملف'?'فتح الملف':'دخول النظام'}</a></div>
+          ${isUnlocked()?`<div class="admin-row">${adminBtns(s,'ghost')}</div>`:''}
+        </td>
+        <td class="c-visits">${ic('eye')}<b class="num">${fmt(s.visits)}</b><small>زيارة</small></td>
+      </tr>`).join('') : `<tr class="empty-row"><td colspan="7">${emptyText()}</td></tr>`}</tbody>
     </table></div>
-    <div class="foot"><span>${QUICK_TITLES[filters.quick]} — يظهر ${fmt(rows.length)} من ${fmt(visible.length)} نظام</span><span>اضغط على عنوان أي عمود للفرز، أو على / للبحث</span></div>`;
+    <div class="foot"><span>${QUICK_TITLES[filters.quick]} — يظهر ${fmt(rows.length)} من ${fmt(visible.length)} نظام</span><span>اضغط على اسم النظام للدخول، وعلى عنوان العمود للفرز</span></div>`;
 }
 
 /* ---------------- Render ---------------- */
@@ -542,7 +650,7 @@ function renderOrderList(){
   if(!SYSTEMS.length){ wrap.innerHTML = `<div style="color:var(--muted);font-size:12.5px;">لا توجد أنظمة بعد</div>`; return; }
   wrap.innerHTML = SYSTEMS.map((s,i)=>`
     <div class="order-row">
-      <span>${esc(s.icon)||'📁'}</span>
+      <span>${sysIcon(s.icon)}</span>
       <span class="nm">${esc(s.name)}</span>
       <button class="mini-btn" data-up="${s.id}" ${i===0?'disabled':''} title="تحريك للأعلى"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
       <button class="mini-btn" data-down="${s.id}" ${i===SYSTEMS.length-1?'disabled':''} title="تحريك للأسفل"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></button>
@@ -568,7 +676,7 @@ function renderCatManageList(){
   if(!CATS.length){ wrap.innerHTML = `<div style="color:var(--muted);font-size:12.5px;">لا توجد تصنيفات بعد</div>`; return; }
   wrap.innerHTML = CATS.map(c=>`
     <div class="cat-row">
-      <span>${esc(c.icon)||'🏷️'}</span>
+      <span>${sysIcon(c.icon,'tag')}</span>
       <span class="nm">${esc(c.name)}</span>
       <button class="mini-btn" data-editcat="${c.id}" title="تعديل"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
       <button class="mini-btn" data-delcat="${c.id}" title="حذف"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>
@@ -619,7 +727,8 @@ function openModal(system){
 function renderIconPicker(selected){
   document.getElementById('f_icon').value = selected;
   const wrap = document.getElementById('iconPicker');
-  wrap.innerHTML = ICON_CHOICES.map(ic=>`<button type="button" class="icon-choice ${ic===selected?'sel':''}" data-ic="${ic}">${ic}</button>`).join('');
+  const norm = x => String(x||'').replace(/\uFE0F/g,'');
+  wrap.innerHTML = ICON_CHOICES.map(e=>`<button type="button" class="icon-choice ${norm(e)===norm(selected)?'sel':''}" data-ic="${e}" title="${EMOJI_MAP[norm(e)]||''}">${sysIcon(e)}</button>`).join('');
   wrap.querySelectorAll('.icon-choice').forEach(btn=>{
     btn.onclick = ()=>{
       document.getElementById('f_icon').value = btn.dataset.ic;

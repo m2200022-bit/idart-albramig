@@ -86,6 +86,11 @@ table{border-collapse:collapse;width:100%}
 .cA .hd-tools{display:flex;align-items:center;gap:10px}
 .cA .hd-sync{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
 .cA .hd-sync .sync::before{box-shadow:0 0 0 3px rgba(74,222,128,.18)}
+.cA .hd-bk{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);font:inherit;font-size:11.5px;cursor:pointer}
+.cA .hd-bk[hidden]{display:none}
+.cA .hd-bk:hover{background:rgba(255,255,255,.14);color:#fff}
+.cA .hd-bk.warn{border-color:#f3b35b;color:#ffd79a}
+.cA .hd-bk .ic{width:14px;height:14px;color:var(--hd-gold)}
 .cA .hd-ver{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;border:1px solid var(--hd-gold-soft);color:rgba(255,255,255,.75);font-size:11.5px}
 .cA .hd-ver b{font-family:var(--f-readex);font-weight:600;color:var(--hd-gold);letter-spacing:.04em}
 .cA .actions{display:flex;align-items:center;gap:2px;padding:3px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.1)}
@@ -329,6 +334,7 @@ body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
         <div class="hd-date" id="hdDate"></div>
         <div class="hd-tools">
           <span class="hd-sync"><span class="sync js-sync off">جارِ الاتصال…</span></span>
+          <button type="button" class="hd-bk" id="backupChip" hidden title="النسخة الاحتياطية التلقائية — اضغط للتحديث الآن"></button>
           <span class="hd-ver" id="appVersion" title="رقم إصدار البوابة">الإصدار <b>Q01</b></span>
           <div class="actions">
             <button class="icon-btn" id="lockBtn" title="مقفل — اضغط لإدخال كلمة المرور"></button>
@@ -432,6 +438,16 @@ body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
         </div>
       </div>
       <div class="settings-section">
+        <h4>النسخ الاحتياطي التلقائي</h4>
+        <p style="font-size:12px;color:var(--muted);margin:0;">اختر مجلدًا على جهازك مرة واحدة (مثل مجلد OneDrive). بعدها تُحفظ نسخة كاملة من البوابة فيه تلقائيًا كلما فتحتَ البوابة وأنت مدير.</p>
+        <div id="backupInfo" style="font-size:12.5px"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="act-btn primary" id="bkChoose">اختيار مكان الحفظ</button>
+          <button class="act-btn" id="bkNow">نسخ احتياطي الآن</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
         <h4>سجل النشاط</h4>
         <p style="font-size:12px;color:var(--muted);margin:0;">آخر 40 عملية قام بها المديرون. لا يمكن تعديل السجل أو حذفه.</p>
         <div id="logList" class="log-list"></div>
@@ -443,7 +459,7 @@ body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
 
 <script type="module">
 /* رقم إصدار البوابة — يُرفع مع كل تحديث: Q01، Q02، … */
-const APP_VERSION = "Q03";
+const APP_VERSION = "Q04";
 /* ---------------- Firebase (Firestore + Auth) — project: droub-55931 ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
@@ -565,6 +581,7 @@ function subscribe(){
     fillCategorySelect();
     renderOrderList();
     setSyncStatus(true, 'متصل');
+    if(typeof bkAuto==='function') bkAuto();
   }, err=>{
     console.error(err);
     setSyncStatus(false, 'تعذّر الاتصال — تحقق من قواعد Firestore');
@@ -1136,8 +1153,87 @@ async function refreshRole(){
     // إزالة كلمة المرور القديمة المكشوفة من قاعدة البيانات
     getDoc(settingsDocRef).then(s=>{ if(s.exists() && 'adminPassword' in s.data()) updateDoc(settingsDocRef, {adminPassword: deleteField()}); }).catch(()=>{});
   }
-  updateLockIcon(); renderTable();
+  updateLockIcon(); renderTable(); bkRender(); bkAuto();
 }
+
+/* ---------------- النسخ الاحتياطي التلقائي إلى مجلد على الجهاز ---------------- */
+const BK = { handle:null, last:null, ran:false };
+const bkSupported = () => 'showDirectoryPicker' in window;
+function bkIdb(){ return new Promise((res,rej)=>{ const r = indexedDB.open('portal-backup',1); r.onupgradeneeded = ()=> r.result.createObjectStore('kv'); r.onsuccess = ()=> res(r.result); r.onerror = ()=> rej(r.error); }); }
+async function bkGet(k){ try{ const d = await bkIdb(); return await new Promise(res=>{ const q = d.transaction('kv').objectStore('kv').get(k); q.onsuccess = ()=> res(q.result); q.onerror = ()=> res(null); }); }catch(e){ return null; } }
+async function bkSet(k,v){ try{ const d = await bkIdb(); await new Promise(res=>{ const t = d.transaction('kv','readwrite'); t.objectStore('kv').put(v,k); t.oncomplete = res; t.onerror = res; }); }catch(e){} }
+const bkFmt = ms => new Intl.DateTimeFormat('ar-QA-u-nu-latn',{day:'numeric',month:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'}).format(ms);
+function bkRender(needPerm){
+  const chip = document.getElementById('backupChip'), info = document.getElementById('backupInfo');
+  const show = IS_ADMIN && bkSupported() && !!BK.handle;
+  chip.hidden = !show;
+  if(show){
+    chip.classList.toggle('warn', !!needPerm);
+    chip.innerHTML = `${ic('archive')}${needPerm ? 'اضغط لتحديث النسخة الاحتياطية' : (BK.last ? `نسخة ${bkFmt(BK.last)}` : 'نسخة احتياطية')}`;
+  }
+  if(info){
+    info.innerHTML = !bkSupported()
+      ? '<span style="color:var(--off)">هذه الميزة تعمل في متصفح Chrome أو Edge على الحاسوب.</span>'
+      : BK.handle
+        ? `مكان الحفظ: <b>${esc(BK.handle.name)}</b> — آخر نسخة: <b>${BK.last ? bkFmt(BK.last) : 'لم تُحفظ بعد'}</b>`
+        : '<span style="color:var(--muted)">لم يُختر مكان الحفظ بعد.</span>';
+  }
+}
+function bkSnapshot(){
+  const strip = o => JSON.parse(JSON.stringify(o, (k,v)=> (v && typeof v==='object' && 'seconds' in v && 'nanoseconds' in v) ? new Date(v.seconds*1000).toISOString() : v));
+  return strip({
+    app: 'بوابة الأنظمة الإلكترونية', version: APP_VERSION, project: firebaseConfig.projectId,
+    createdAt: new Date().toISOString(), by: USER && USER.email,
+    config: { portalName: PORTAL_NAME, portalSub: PORTAL_SUB, portalIcon: PORTAL_ICON },
+    systems: SYSTEMS, categories: CATS, admins: ADMINS, log: LOGS
+  });
+}
+async function runBackup(fromClick){
+  if(!IS_ADMIN || !bkSupported() || !BK.handle || !LOADED) return false;
+  let perm = await BK.handle.queryPermission({mode:'readwrite'});
+  if(perm !== 'granted' && fromClick) perm = await BK.handle.requestPermission({mode:'readwrite'});
+  if(perm !== 'granted'){ bkRender(true); return false; }
+  try{
+    const json = JSON.stringify(bkSnapshot(), null, 2);
+    const day = new Date().toLocaleDateString('en-CA');
+    for(const name of ['بوابة-الأنظمة-نسخة-احتياطية-الأحدث.json', `بوابة-الأنظمة-نسخة-احتياطية-${day}.json`]){
+      const fh = await BK.handle.getFileHandle(name, {create:true});
+      const w = await fh.createWritable(); await w.write(json); await w.close();
+    }
+    BK.last = Date.now(); await bkSet('last', BK.last);
+    bkRender(false);
+    showToast(`تم تحديث النسخة الاحتياطية بتاريخ ${bkFmt(BK.last)}`);
+    return true;
+  }catch(e){ console.error(e); showToast('تعذّر حفظ النسخة الاحتياطية — اختر مكان الحفظ من جديد'); bkRender(true); return false; }
+}
+async function bkInit(){
+  if(!bkSupported()){ bkRender(); return; }
+  BK.handle = await bkGet('dir'); BK.last = await bkGet('last');
+  bkRender();
+}
+/* تُحفظ النسخة مرة واحدة عند كل فتح للبوابة، بعد تحميل البيانات وتأكيد أن المستخدم مدير */
+function bkAuto(){
+  if(BK.ran || !IS_ADMIN || !LOADED || !BK.handle) return;
+  BK.ran = true;
+  setTimeout(()=> runBackup(false), 1500);
+}
+document.getElementById('backupChip').addEventListener('click', ()=> runBackup(true));
+document.getElementById('bkNow').addEventListener('click', async ()=>{
+  if(!bkSupported()){ showToast('النسخ الاحتياطي التلقائي يعمل في Chrome أو Edge على الحاسوب'); return; }
+  if(!BK.handle){ document.getElementById('bkChoose').click(); return; }
+  await runBackup(true);
+});
+document.getElementById('bkChoose').addEventListener('click', async ()=>{
+  if(!bkSupported()){ showToast('النسخ الاحتياطي التلقائي يعمل في Chrome أو Edge على الحاسوب'); return; }
+  try{
+    const h = await window.showDirectoryPicker({ id:'portal-backup', mode:'readwrite' });
+    BK.handle = h; await bkSet('dir', h);
+    showToast(`تم اختيار «${h.name}» مكانًا للنسخ الاحتياطي`);
+    logAction('اختيار مكان النسخ الاحتياطي', h.name);
+    await runBackup(true);
+  }catch(e){ if(e && e.name!=='AbortError'){ console.error(e); showToast('تعذّر اختيار المجلد'); } }
+});
+bkInit();
 
 /* أول حساب Google يُعيَّن مالكًا ومديرًا للبوابة — مرة واحدة فقط */
 async function claimOwnership(){
@@ -1220,7 +1316,7 @@ document.getElementById('settingsBtn').addEventListener('click', ()=> requireGat
   document.getElementById('set_icon').value = PORTAL_ICON;
   renderOrderList();
   renderCatManageList();
-  renderAdminList(); renderLog();
+  renderAdminList(); renderLog(); bkRender();
   document.getElementById('settingsModal').classList.add('show');
 }));
 function closeSettings(){ document.getElementById('settingsModal').classList.remove('show'); }

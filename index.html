@@ -356,27 +356,16 @@ body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
       </div>
 
       <div class="settings-section">
-        <h4>كلمة مرور التعديل والحذف</h4>
-        <p style="font-size:12px;color:var(--muted);margin:0;">عند تعيين كلمة مرور، لن يُسمح بتعديل أو حذف أي نظام إلا بعد إدخالها.</p>
-        <div class="field"><label for="set_curpass">كلمة المرور الحالية (اتركها فارغة إن لم تُعيَّن من قبل)</label><input type="password" id="set_curpass"></div>
-        <div class="field"><label for="set_newpass">كلمة المرور الجديدة</label><input type="password" id="set_newpass" placeholder="اتركها فارغة لإلغاء الحماية"></div>
-        <button class="act-btn primary" id="savePassword">حفظ كلمة المرور</button>
+        <h4>المديرون</h4>
+        <p style="font-size:12px;color:var(--muted);margin:0;">الحسابات التي تستطيع الإضافة والتعديل والحذف والترتيب. يدخل كل مدير بحساب Google الخاص به، ولا توجد كلمة مرور مشتركة.</p>
+        <div id="adminList"></div>
+        <div style="display:flex;gap:8px;">
+          <input type="email" id="newAdminEmail" placeholder="بريد Google للمدير الجديد" dir="ltr" style="flex:1;min-width:0;padding:9px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);">
+          <button class="act-btn primary" id="addAdminBtn">إضافة</button>
+        </div>
       </div>
     </div>
     <div class="modal-foot"><button class="act-btn" id="settingsCloseBottom">إغلاق</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="gateModal">
-  <div class="modal-card" style="max-width:340px;">
-    <div class="modal-head"><h3>كلمة المرور مطلوبة</h3><button class="modal-close" id="gateClose">✕</button></div>
-    <div class="modal-body">
-      <div class="field"><label for="gatePassInput">أدخل كلمة المرور للمتابعة</label><input type="password" id="gatePassInput"></div>
-    </div>
-    <div class="modal-foot">
-      <button class="act-btn primary" id="gateSubmit">تأكيد</button>
-      <button class="act-btn" id="gateCancel">إلغاء</button>
-    </div>
   </div>
 </div>
 
@@ -384,9 +373,9 @@ body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
 /* ---------------- Firebase (Firestore + Auth) — project: droub-55931 ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDocs, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, increment
+  getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, increment, writeBatch, arrayUnion, arrayRemove, deleteField
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, signInAnonymously, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAYn7DzTC03I7Q_My7xuJD33ELQwwuhe84",
@@ -403,32 +392,21 @@ const auth = getAuth(fbApp);
 const COL = "portal_systems";
 const settingsDocRef = doc(db, "portal_meta", "config");
 const categoriesCol = collection(db, "portal_categories");
+const adminsCol = collection(db, "portal_admins");
+const ownerDocRef = doc(db, "portal_meta", "owner");
 
 let PORTAL_NAME = "بوابة الأنظمة الإلكترونية";
 let PORTAL_ICON = "إ";
 let PORTAL_SUB = "إدارة الدعوة والإرشاد الديني";
-let ADMIN_PASSWORD = "";
+let USER = null;          // المستخدم الحالي (مجهول أو حساب Google)
+let IS_ADMIN = false;     // حساب Google مسجّل في قائمة المديرين
+let OWNER_EXISTS = true;  // هل عُيِّن مالك البوابة بعد؟
+let FAVS = new Set();     // مفضلة المستخدم الحالي فقط
+let ADMINS = [];
+let unsubFav = null, unsubAdmins = null;
 let CATS = [];
-let pendingGateAction = null;
 let SYNC = { ok:false, label:"جارِ الاتصال…" };
 let LOADED = false;
-
-
-const DEFAULT_CATS = [
-  {name:"تسجيل الطلاب", icon:"🎓"}, {name:"الموارد البشرية", icon:"👥"}, {name:"مالي", icon:"💰"},
-  {name:"التقارير", icon:"📊"}, {name:"الخدمات الإلكترونية", icon:"🌐"}, {name:"البرامج التدريبية", icon:"🏅"},
-  {name:"إداري", icon:"🗂️"}, {name:"الأنظمة الداخلية", icon:"🏢"},
-];
-const SEED = [
-  { name:"تسجيل الطلاب", icon:"📝", category:"تسجيل الطلاب", desc:"إدارة طلبات التسجيل والقبول للبرامج والصفوف", status:"on", updated:"2026-07-27", url:"registration.html", visits:1284, order:0 , favorite:true, createdAt:1755000000000 },
-  { name:"إدارة الموارد البشرية", icon:"👥", category:"الموارد البشرية", desc:"ملفات الموظفين والإجازات والدوام", status:"on", updated:"2026-07-25", url:"#", visits:842, order:1 , favorite:false, createdAt:1754996400000 },
-  { name:"النظام المالي", icon:"💰", category:"مالي", desc:"المصروفات والميزانيات والتقارير المالية", status:"on", updated:"2026-07-20", url:"#", visits:611, order:2 , favorite:true, createdAt:1754992800000 },
-  { name:"بوابة التقارير الإدارية", icon:"📊", category:"التقارير", desc:"تقارير الأداء والمؤشرات الدورية", status:"on", updated:"2026-07-18", url:"#", visits:397, order:3 , favorite:false, createdAt:1754989200000 },
-  { name:"الخدمات الإلكترونية للعملاء", icon:"🌐", category:"الخدمات الإلكترونية", desc:"طلبات الخدمة الإلكترونية والمتابعة", status:"on", updated:"2026-07-15", url:"#", visits:2033, order:4 , favorite:false, createdAt:1754985600000 },
-  { name:"إدارة البرامج التدريبية", icon:"🎓", category:"البرامج التدريبية", desc:"جدولة الدورات التدريبية والمدربين", status:"off", updated:"2026-06-30", url:"#", visits:156, order:5 , favorite:false, createdAt:1754982000000 },
-  { name:"الأرشيف الإداري", icon:"🗂️", category:"إداري", desc:"حفظ ومتابعة المعاملات والمراسلات", status:"on", updated:"2026-07-10", url:"#", visits:289, order:6 , favorite:false, createdAt:1754978400000 },
-  { name:"الأنظمة الداخلية للمنشآت", icon:"🏢", category:"الأنظمة الداخلية", desc:"إدارة المرافق والصيانة الدورية", status:"off", updated:"2026-06-12", url:"#", visits:74, order:7 , favorite:false, createdAt:1754974800000 },
-];
 
 
 /* ---------------- مكتبة الأيقونات (خطية موحّدة) ---------------- */
@@ -501,22 +479,6 @@ let editingId = null;
 let pendingHtml = null;
 const MAX_HTML_SIZE = 900000;
 
-async function ensureSeeded(){
-  try{
-    const snap = await getDocs(collection(db, COL));
-    if(snap.empty){ await Promise.all(SEED.map(s => setDoc(doc(db, COL, newId()), s))); }
-    const catSnap = await getDocs(categoriesCol);
-    if(catSnap.empty){ await Promise.all(DEFAULT_CATS.map(c => addDoc(categoriesCol, c))); }
-    const cfgSnap = await getDoc(settingsDocRef);
-    if(!cfgSnap.exists()){
-      await setDoc(settingsDocRef, {portalName: PORTAL_NAME, portalIcon: PORTAL_ICON, adminPassword: ""});
-    }
-  }catch(e){
-    console.error('ensureSeeded failed:', e);
-    showToast('تعذّر الاتصال بقاعدة البيانات عند بدء التشغيل — تحقق من قواعد Firestore Rules');
-  }
-}
-
 function subscribe(){
   onSnapshot(collection(db, COL), snap=>{
     SYSTEMS = snap.docs.map(d=>({ id:d.id, ...d.data() })).sort((a,b)=>(a.order??999)-(b.order??999));
@@ -537,7 +499,6 @@ function subscribe(){
       PORTAL_NAME = d.portalName || PORTAL_NAME;
       PORTAL_ICON = d.portalIcon || PORTAL_ICON;
       PORTAL_SUB = d.portalSub ?? PORTAL_SUB;
-      ADMIN_PASSWORD = d.adminPassword || "";
       applyBranding();
     }
   }, err=> console.error(err));
@@ -573,7 +534,9 @@ function fillCategorySelect(){
   renderTable();
 }
 
-function isUnlocked(){ return sessionStorage.getItem('gate_unlocked')==='1'; }
+function adminMode(){ try{ return sessionStorage.getItem('admin_mode')!=='0'; }catch(e){ return true; } }
+function isUnlocked(){ return IS_ADMIN && adminMode(); }
+const isGoogleUser = () => !!(USER && !USER.isAnonymous && USER.email);
 
 function getFiltered(){
   let list = SYSTEMS.filter(s=>{
@@ -587,7 +550,7 @@ function getFiltered(){
     }
     return true;
   });
-  if(filters.quick==="favorites") list = list.filter(s=>s.favorite);
+  if(filters.quick==="favorites") list = list.filter(s=>FAVS.has(s.id));
   else if(filters.quick==="recent") list = list.filter(s=>s.lastOpened).sort((a,b)=>(b.lastOpened||0)-(a.lastOpened||0));
   else if(filters.quick==="popular") list = [...list].sort((a,b)=>(b.visits||0)-(a.visits||0));
   else if(filters.quick==="new") list = [...list].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
@@ -624,7 +587,7 @@ function totals(){
   return { all:SYSTEMS.length, on, off:SYSTEMS.length-on, cats:CATEGORIES.length, visits:SYSTEMS.reduce((a,s)=>a+(s.visits||0),0) };
 }
 const statusPill = s => `<span class="status ${s.status==='on'?'on':'off'}">${s.status==='on'?'متاح':'معطّل'}</span>`;
-const favBtn = s => `<button type="button" class="fav ${s.favorite?'on':''}" data-fav="${s.id}" title="${s.favorite?'إزالة من المفضلة':'إضافة إلى المفضلة'}" aria-label="مفضلة">${ic('star')}</button>`;
+const favBtn = s => `<button type="button" class="fav ${FAVS.has(s.id)?'on':''}" data-fav="${s.id}" title="${FAVS.has(s.id)?'إزالة من المفضلة':'إضافة إلى المفضلة'}" aria-label="مفضلة">${ic('star')}</button>`;
 const openLabel = s => s.htmlContent && (!s.url || s.url==='#') ? 'فتح الملف' : 'فتح النظام';
 const openAttrs = s => `href="${esc(s.url)||'#'}" data-open data-id="${s.id}"`;
 const adminBtns = (s, cls='') => isUnlocked() ? `
@@ -903,7 +866,7 @@ async function saveModal(){
     visits: editingId ? (SYSTEMS.find(s=>s.id===editingId)?.visits || 0) : 0,
     order: editingId ? (SYSTEMS.find(s=>s.id===editingId)?.order ?? 999) : (SYSTEMS.length ? Math.max(...SYSTEMS.map(s=>s.order??0))+1 : 0),
   };
-  if(!editingId){ data.favorite = false; data.createdAt = Date.now(); }
+  if(!editingId){ data.createdAt = Date.now(); }
   if(pendingHtml){ data.htmlFileName = pendingHtml.name; data.htmlContent = pendingHtml.content; }
   else if(!editingId){ data.htmlFileName = null; data.htmlContent = null; }
   try{
@@ -968,7 +931,12 @@ stage.addEventListener('click', e=>{
   if((b = el('[data-open]'))){ e.preventDefault(); openSystemById(b.dataset.id); return; }
   if((b = el('[data-fav]'))){
     const s = SYSTEMS.find(x=>x.id===b.dataset.fav);
-    if(s) updateDoc(doc(db, COL, s.id), { favorite: !s.favorite }).catch(err=>{ console.error(err); showToast('تعذّر تحديث المفضلة'); });
+    if(s && USER){
+      const on = FAVS.has(s.id);
+      on ? FAVS.delete(s.id) : FAVS.add(s.id); renderTable();
+      setDoc(doc(db, 'portal_users', USER.uid), { favorites: on ? arrayRemove(s.id) : arrayUnion(s.id) }, {merge:true})
+        .catch(err=>{ console.error(err); showToast('تعذّر حفظ المفضلة'); });
+    }
     return;
   }
   if((b = el('[data-cat]'))){ filters.category = b.dataset.cat; renderTable(); return; }
@@ -997,7 +965,6 @@ document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){ document.querySelectorAll('.modal-overlay.show').forEach(m=>m.classList.remove('show')); }
 });
 
-document.getElementById('logoutLink').addEventListener('click', e=>{ e.preventDefault(); showToast('تم تسجيل الخروج (عرض توضيحي)'); });
 document.getElementById('f_html').addEventListener('change', (e)=>{
   const file = e.target.files[0];
   if(!file) return;
@@ -1020,61 +987,144 @@ document.getElementById('modalCancel').addEventListener('click', closeModal);
 document.getElementById('modalSave').addEventListener('click', saveModal);
 document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay') closeModal(); });
 
-/* ---------------- Password gate for edit/delete/disable ---------------- */
+/* ---------------- الدخول بحساب Google وصلاحيات المديرين ---------------- */
 const ICON_LOCKED = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`;
 const ICON_UNLOCKED = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.6-1.8"/></svg>`;
+const ICON_LOGIN = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg>`;
+const ICON_LOGOUT = `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>`;
+
 function updateLockIcon(){
   const unlocked = isUnlocked();
   const btn = document.getElementById('lockBtn');
   btn.innerHTML = unlocked ? ICON_UNLOCKED : ICON_LOCKED;
   btn.classList.toggle('unlocked', unlocked);
-  btn.title = unlocked ? 'وضع الإدارة مفتوح — اضغط لإعادة القفل' : 'مقفل — اضغط لإدخال كلمة المرور';
+  btn.title = !isGoogleUser() ? 'دخول المدير بحساب Google'
+            : !IS_ADMIN ? 'هذا الحساب ليس مديرًا'
+            : unlocked ? 'وضع الإدارة مفتوح — اضغط لإخفاء أدوات الإدارة' : 'اضغط لإظهار أدوات الإدارة';
+  const link = document.getElementById('logoutLink');
+  if(isGoogleUser()){
+    const nm = USER.displayName || USER.email;
+    link.innerHTML = `${USER.photoURL?`<img src="${esc(USER.photoURL)}" alt="" referrerpolicy="no-referrer" style="width:20px;height:20px;border-radius:50%">`:ICON_LOGOUT}<span>${esc(nm.split(' ')[0])}${IS_ADMIN?' · مدير':''}</span>`;
+    link.title = `${USER.email} — اضغط لتسجيل الخروج`;
+  } else {
+    link.innerHTML = `${ICON_LOGIN}<span>دخول المدير</span>`;
+    link.title = 'تسجيل الدخول بحساب Google';
+  }
 }
+
+async function googleSignIn(){
+  try{
+    const res = await signInWithPopup(auth, new GoogleAuthProvider());
+    return res.user;
+  }catch(e){
+    console.error(e);
+    if(e.code==='auth/popup-closed-by-user' || e.code==='auth/cancelled-popup-request') return null;
+    if(e.code==='auth/unauthorized-domain') showToast('أضف نطاق البوابة إلى Authorized domains في Firebase Authentication');
+    else if(e.code==='auth/operation-not-allowed') showToast('فعّل الدخول بحساب Google من Firebase Authentication');
+    else if(e.code==='auth/popup-blocked') showToast('اسمح بالنوافذ المنبثقة لهذا الموقع ثم أعد المحاولة');
+    else showToast('تعذّر تسجيل الدخول، حاول مجددًا');
+    return null;
+  }
+}
+
+/* يتحقق من الصلاحية بعد كل تغيّر في الحساب */
+async function refreshRole(){
+  IS_ADMIN = false; OWNER_EXISTS = true;
+  if(isGoogleUser()){
+    try{ IS_ADMIN = (await getDoc(doc(adminsCol, USER.email.toLowerCase()))).exists(); }catch(e){ IS_ADMIN = false; }
+    try{ OWNER_EXISTS = (await getDoc(ownerDocRef)).exists(); }catch(e){ OWNER_EXISTS = true; }
+  }
+  if(unsubAdmins){ unsubAdmins(); unsubAdmins = null; }
+  if(IS_ADMIN){
+    unsubAdmins = onSnapshot(adminsCol, snap=>{ ADMINS = snap.docs.map(d=>({id:d.id, ...d.data()})); renderAdminList(); }, err=>console.error(err));
+    // إزالة كلمة المرور القديمة المكشوفة من قاعدة البيانات
+    getDoc(settingsDocRef).then(s=>{ if(s.exists() && 'adminPassword' in s.data()) updateDoc(settingsDocRef, {adminPassword: deleteField()}); }).catch(()=>{});
+  }
+  updateLockIcon(); renderTable();
+}
+
+/* أول حساب Google يُعيَّن مالكًا ومديرًا للبوابة — مرة واحدة فقط */
+async function claimOwnership(){
+  const email = USER.email.toLowerCase();
+  const b = writeBatch(db);
+  b.set(ownerDocRef, { email, uid: USER.uid, at: Date.now() });
+  b.set(doc(adminsCol, email), { email, name: USER.displayName || '', addedBy: email, at: Date.now() });
+  await b.commit();
+}
+
+/* يُنفّذ الإجراء إذا كان المستخدم مديرًا، وإلا يطلب الدخول بحساب Google */
+async function requireGate(action){
+  if(isUnlocked()){ action(); return; }
+  if(IS_ADMIN){ try{ sessionStorage.setItem('admin_mode','1'); }catch(e){} updateLockIcon(); renderTable(); action(); return; }
+  if(!isGoogleUser()){
+    const u = await googleSignIn(); if(!u) return;
+    USER = u; await refreshRole();
+  }
+  if(!IS_ADMIN && !OWNER_EXISTS){
+    try{
+      await claimOwnership(); await refreshRole();
+      showToast(`تم تعيين ${USER.email} مالكًا ومديرًا للبوابة ✓`);
+    }catch(e){ console.error(e); showToast('تعذّر تعيين المدير، حاول مجددًا'); return; }
+  }
+  if(IS_ADMIN){ try{ sessionStorage.setItem('admin_mode','1'); }catch(e){} updateLockIcon(); renderTable(); action(); }
+  else showToast(`الحساب ${USER.email} ليس من مديري البوابة`);
+}
+
 document.getElementById('lockBtn').addEventListener('click', ()=>{
   if(isUnlocked()){
-    sessionStorage.removeItem('gate_unlocked');
+    try{ sessionStorage.setItem('admin_mode','0'); }catch(e){}
     filters.status = 'all';
     updateLockIcon(); renderTable();
-    showToast('تم قفل صلاحيات التعديل والحذف والتعطيل');
+    showToast('تم إخفاء أدوات الإدارة');
   } else {
-    requireGate(()=>{ sessionStorage.setItem('gate_unlocked','1'); updateLockIcon(); renderTable(); showToast('تم فتح صلاحيات التعديل والحذف والتعطيل ✓'); });
+    requireGate(()=> showToast('وضع الإدارة مفتوح ✓'));
   }
 });
-updateLockIcon();
-
-function requireGate(action){
-  if(!ADMIN_PASSWORD){ action(); return; }
-  if(isUnlocked()){ action(); return; }
-  pendingGateAction = action;
-  document.getElementById('gatePassInput').value = '';
-  document.getElementById('gateModal').classList.add('show');
-  setTimeout(()=> document.getElementById('gatePassInput').focus(), 50);
-}
-document.getElementById('gateClose').addEventListener('click', ()=>{ document.getElementById('gateModal').classList.remove('show'); pendingGateAction=null; });
-document.getElementById('gateCancel').addEventListener('click', ()=>{ document.getElementById('gateModal').classList.remove('show'); pendingGateAction=null; });
-document.getElementById('gateSubmit').addEventListener('click', ()=>{
-  const val = document.getElementById('gatePassInput').value;
-  if(val === ADMIN_PASSWORD){
-    sessionStorage.setItem('gate_unlocked','1');
-    updateLockIcon(); renderTable();
-    document.getElementById('gateModal').classList.remove('show');
-    const act = pendingGateAction; pendingGateAction=null;
-    if(act) act();
-  } else { showToast('كلمة المرور غير صحيحة'); }
+document.getElementById('logoutLink').addEventListener('click', async e=>{
+  e.preventDefault();
+  if(isGoogleUser()){
+    await signOut(auth);
+    showToast('تم تسجيل الخروج');
+  } else {
+    requireGate(()=> showToast('وضع الإدارة مفتوح ✓'));
+  }
 });
-document.getElementById('gatePassInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('gateSubmit').click(); });
+
+function renderAdminList(){
+  const wrap = document.getElementById('adminList'); if(!wrap) return;
+  wrap.innerHTML = ADMINS.map(a=>`
+    <div class="cat-row">
+      <span>${ic('users')}</span>
+      <span class="nm" dir="ltr" style="text-align:right">${esc(a.id)}${a.id===(USER?.email||'').toLowerCase()?' <small style="color:var(--muted)">(أنت)</small>':''}</span>
+      ${a.id===(USER?.email||'').toLowerCase()?'':`<button class="mini-btn" data-deladmin="${esc(a.id)}" title="إزالة">${ic('trash')}</button>`}
+    </div>`).join('') || `<div style="color:var(--muted);font-size:12.5px;">لا يوجد مديرون</div>`;
+  wrap.querySelectorAll('[data-deladmin]').forEach(btn=>{
+    btn.onclick = async ()=>{
+      try{ await deleteDoc(doc(adminsCol, btn.dataset.deladmin)); showToast('تمت إزالة المدير'); }
+      catch(e){ console.error(e); showToast('تعذّرت إزالة المدير'); }
+    };
+  });
+}
+document.getElementById('addAdminBtn').addEventListener('click', ()=> requireGate(async ()=>{
+  const email = document.getElementById('newAdminEmail').value.trim().toLowerCase();
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showToast('أدخل بريدًا إلكترونيًا صحيحًا'); return; }
+  try{
+    await setDoc(doc(adminsCol, email), { email, name:'', addedBy: USER.email.toLowerCase(), at: Date.now() });
+    document.getElementById('newAdminEmail').value = '';
+    showToast('تمت إضافة المدير ✓ — يدخل بحساب Google الخاص به');
+  }catch(e){ console.error(e); showToast('تعذّرت إضافة المدير'); }
+}));
 
 /* ---------------- Settings modal ---------------- */
-document.getElementById('settingsBtn').addEventListener('click', ()=>{
+document.getElementById('settingsBtn').addEventListener('click', ()=> requireGate(()=>{
   document.getElementById('set_name').value = PORTAL_NAME;
   document.getElementById('set_sub').value = PORTAL_SUB;
   document.getElementById('set_icon').value = PORTAL_ICON;
-  document.getElementById('set_curpass').value = '';
-  document.getElementById('set_newpass').value = '';
   renderOrderList();
   renderCatManageList();
+  renderAdminList();
   document.getElementById('settingsModal').classList.add('show');
-});
+}));
 function closeSettings(){ document.getElementById('settingsModal').classList.remove('show'); }
 document.getElementById('settingsClose').addEventListener('click', closeSettings);
 document.getElementById('settingsCloseBottom').addEventListener('click', closeSettings);
@@ -1101,34 +1151,23 @@ document.getElementById('addCatBtn').addEventListener('click', ()=> requireGate(
   }catch(e){ console.error(e); showToast('تعذّر إضافة التصنيف'); }
 }));
 
-document.getElementById('savePassword').addEventListener('click', async ()=>{
-  const cur = document.getElementById('set_curpass').value;
-  const next = document.getElementById('set_newpass').value;
-  if(ADMIN_PASSWORD && cur !== ADMIN_PASSWORD){ showToast('كلمة المرور الحالية غير صحيحة'); return; }
-  try{
-    await setDoc(settingsDocRef, {adminPassword: next}, {merge:true});
-    sessionStorage.removeItem('gate_unlocked');
-    updateLockIcon(); renderTable();
-    showToast(next ? 'تم تفعيل حماية التعديل/الحذف/التعطيل بكلمة المرور ✓' : 'تم إلغاء حماية التعديل/الحذف/التعطيل ✓');
-    document.getElementById('set_curpass').value = '';
-    document.getElementById('set_newpass').value = '';
-  }catch(e){ console.error(e); showToast('تعذّر حفظ كلمة المرور'); }
-});
-
 /* ---------------- Boot ---------------- */
 renderTable();
-function bootData(){
-  ensureSeeded().then(subscribe).catch(e=>{
-    console.error('Boot failed:', e);
-    setSyncStatus(false, 'تعذّر بدء التشغيل');
-    showToast('تعذّر بدء تشغيل البوابة — تحقق من الاتصال بقاعدة البيانات');
-    subscribe();
-  });
-}
-signInAnonymously(auth).then(bootData).catch(e=>{
-  console.error('Anonymous sign-in failed:', e);
-  showToast('تنبيه: تسجيل الدخول المجهول غير مفعّل من Firebase Console — إن كانت قواعد Firestore لا تزال مفتوحة فالبوابة ستعمل بشكل طبيعي رغم ذلك');
-  bootData();
+let subscribed = false;
+onAuthStateChanged(auth, async u=>{
+  if(!u){
+    try{ await signInAnonymously(auth); }
+    catch(e){ console.error(e); if(!subscribed){ subscribed = true; subscribe(); } showToast('فعّل الدخول المجهول (Anonymous) من Firebase Authentication'); }
+    return;
+  }
+  USER = u;
+  if(!subscribed){ subscribed = true; subscribe(); }
+  if(unsubFav){ unsubFav(); unsubFav = null; }
+  FAVS = new Set();
+  unsubFav = onSnapshot(doc(db, 'portal_users', u.uid), s=>{
+    FAVS = new Set((s.exists() && s.data().favorites) || []); renderTable();
+  }, err=>console.error(err));
+  await refreshRole();
 });
 </script>
 </body>

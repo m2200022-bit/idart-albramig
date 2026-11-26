@@ -1,0 +1,69 @@
+rules_version = '2';
+// قواعد حماية «بوابة الأنظمة الإلكترونية» — مشروع droub-55931
+// القراءة متاحة للجميع، والتعديل لمديري البوابة فقط (حساب Google مسجّل في portal_admins)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function googleEmail() { return request.auth.token.email.lower(); }
+    function isGoogle() {
+      return signedIn()
+        && request.auth.token.firebase.sign_in_provider == 'google.com'
+        && request.auth.token.email_verified == true;
+    }
+    function isAdmin() {
+      return isGoogle() && exists(/databases/$(database)/documents/portal_admins/$(googleEmail()));
+    }
+
+    // الأنظمة: الزائر يستطيع فقط زيادة عدّاد الزيارات وتسجيل وقت آخر فتح
+    match /portal_systems/{id} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['visits', 'lastOpened'])
+        && request.resource.data.visits == resource.data.get('visits', 0) + 1
+        && request.resource.data.lastOpened is int
+      );
+    }
+
+    match /portal_categories/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /portal_meta/config {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // المالك يُعيَّن مرة واحدة فقط، مع إضافته مديرًا في نفس العملية
+    match /portal_meta/owner {
+      allow read: if true;
+      allow create: if isGoogle()
+        && !exists(/databases/$(database)/documents/portal_meta/owner)
+        && request.resource.data.email == googleEmail()
+        && existsAfter(/databases/$(database)/documents/portal_admins/$(googleEmail()));
+      allow update, delete: if false;
+    }
+
+    match /portal_admins/{email} {
+      allow read: if isAdmin() || (isGoogle() && email == googleEmail());
+      allow create: if isAdmin() || (
+        isGoogle() && email == googleEmail()
+        && !exists(/databases/$(database)/documents/portal_meta/owner)
+        && getAfter(/databases/$(database)/documents/portal_meta/owner).data.email == email
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    // مفضلة كل مستخدم خاصة به
+    match /portal_users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // ⚠️ أبقِ هنا قواعد أنظمتك الأخرى التي تستخدم نفس المشروع (droub-55931)،
+    // ولا تضف قاعدة عامة مفتوحة مثل match /{document=**} { allow read, write: if true; }
+    // لأنها تُبطل كل الحماية أعلاه.
+  }
+}

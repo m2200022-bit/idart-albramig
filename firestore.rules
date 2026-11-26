@@ -1,9 +1,31 @@
 rules_version = '2';
-// قواعد حماية «بوابة الأنظمة الإلكترونية» — مشروع droub-55931
-// القراءة متاحة للجميع، والتعديل لمديري البوابة فقط (حساب Google مسجّل في portal_admins)
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // بوابة الرقابة والتفتيش: حسابك فقط
+    match /rqaba/{doc=**} {
+      allow read, write: if request.auth != null && request.auth.uid == "UzPjhV2ZFThbxS7AUNAfRytYPYO2";
+    }
+
+    // نظام طلبات الفعاليات والبرامج: الأعضاء المسجّلون فقط
+    function isEventsMember() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/appAccess/members) &&
+        request.auth.uid in get(/databases/$(database)/documents/appAccess/members).data.uids;
+    }
+    match /appState/{doc=**} {
+      allow read, write: if isEventsMember();
+    }
+    match /appAccess/{doc=**} {
+      allow read: if request.auth != null;
+      allow write: if isEventsMember();
+    }
+    match /appLogin/{doc=**} {
+      allow read: if true;
+      allow write: if isEventsMember();
+    }
+
+    // بوابة الأنظمة الإلكترونية: القراءة للجميع، والتعديل لمديري البوابة فقط
     function signedIn() { return request.auth != null; }
     function googleEmail() { return request.auth.token.email.lower(); }
     function isGoogle() {
@@ -62,8 +84,10 @@ service cloud.firestore {
       allow read, write: if signedIn() && request.auth.uid == uid;
     }
 
-    // ⚠️ أبقِ هنا قواعد أنظمتك الأخرى التي تستخدم نفس المشروع (droub-55931)،
-    // ولا تضف قاعدة عامة مفتوحة مثل match /{document=**} { allow read, write: if true; }
-    // لأنها تُبطل كل الحماية أعلاه.
+    // أي بيانات أخرى في نفس المشروع تبقى كما كانت
+    match /{col}/{doc=**} {
+      allow read, write: if !(col in ["rqaba", "appState", "appAccess", "appLogin",
+        "portal_systems", "portal_categories", "portal_meta", "portal_admins", "portal_users"]);
+    }
   }
 }

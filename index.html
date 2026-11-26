@@ -65,23 +65,59 @@ table{border-collapse:collapse;width:100%}
 :root[data-theme="dark"] .cA{--a-bg:#1a1214;--a-surface:#22181b;--a-ink:#f3e9eb;--a-muted:#b59fa5;--a-line:#3a2a2f;--a-zebra:#261b1e;--a-soft:#3a1e26;--a-maroon-soft:#6a3442;--a-maroon:#b8325a;--a-maroon-d:#4a0b1e;--a-gold:#d4b07a}
 
 /* الشريط العلوي */
-.cA .band{background:var(--a-maroon-d);color:#fff;padding:20px 24px 26px;display:flex;flex-direction:column;gap:18px;position:relative}
-.cA .band::after{content:"";position:absolute;inset:auto 0 0 0;height:10px;background:repeating-linear-gradient(-45deg,transparent 0 6px,rgba(255,255,255,.14) 6px 9px)}
-.cA .band-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
-.cA .crest{display:flex;align-items:center;gap:14px}
-.cA .seal{width:50px;height:50px;border:1.5px solid var(--a-gold);color:var(--a-gold);display:grid;place-items:center;font-family:var(--f-kufi);font-weight:800;font-size:20px;border-radius:50%;flex-shrink:0}
-.cA .crest h1{font-family:var(--f-kufi);font-size:19px;margin:0;text-wrap:balance}
-.cA .crest small{display:flex;flex-wrap:wrap;gap:4px 10px;opacity:.85;font-size:12px}
-.cA .band .icon-btn{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);color:#fff}
-.cA .band .icon-btn:hover{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.4)}
-.cA .band .icon-btn.unlocked{background:var(--a-gold);border-color:var(--a-gold);color:#2a1a1e}
-.cA .band .logout-link{color:rgba(255,255,255,.75)}
-.cA .band .logout-link:hover{color:#fff}
-.cA .summary{display:flex;flex-wrap:wrap;row-gap:10px;font-size:12.5px}
-.cA .summary span{padding:0 16px;border-inline-start:1px solid rgba(255,255,255,.25)}
-.cA .summary span:first-child{padding-inline-start:0;border:0}
-.cA .summary b{font-family:var(--f-kufi);font-size:18px;display:block;color:var(--a-gold)}
-.cA .summary .warn b{color:#ffb4a8}
+/* ---- رأس البوابة ---- */
+.cA .band{--hd-a:#6e1230;--hd-b:#3f0919;--hd-gold:#c9a46a;--hd-gold-soft:rgba(201,164,106,.35);
+  position:relative;color:#fff;padding:0;overflow:hidden;
+  background:
+    radial-gradient(120% 140% at 100% 0%,rgba(201,164,106,.16),transparent 55%),
+    linear-gradient(135deg,var(--hd-a),var(--hd-b))}
+.cA .band::before{content:"";position:absolute;inset:0;opacity:.07;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23fff' stroke-width='1'%3E%3Crect x='16' y='16' width='24' height='24'/%3E%3Crect x='16' y='16' width='24' height='24' transform='rotate(45 28 28)'/%3E%3Ccircle cx='28' cy='28' r='6'/%3E%3Cpath d='M0 0l16 16M56 0L40 16M0 56l16-16M56 56L40 40'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:56px 56px;-webkit-mask-image:linear-gradient(to left,#000 10%,transparent 75%);mask-image:linear-gradient(to left,#000 10%,transparent 75%)}
+.cA .band::after{content:"";position:absolute;inset:auto 0 0 0;height:12px;
+  background:var(--a-surface);
+  -webkit-mask:linear-gradient(-45deg,#000 6px,transparent 0) 0 100%/12px 12px repeat-x,linear-gradient(45deg,#000 6px,transparent 0) 0 100%/12px 12px repeat-x;
+  mask:linear-gradient(-45deg,#000 6px,transparent 0) 0 100%/12px 12px repeat-x,linear-gradient(45deg,#000 6px,transparent 0) 0 100%/12px 12px repeat-x}
+.cA .hd-top,.cA .hd-main{position:relative;z-index:1}
+.cA .hd-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:10px 28px;border-bottom:1px solid rgba(255,255,255,.1);font-size:12px;color:rgba(255,255,255,.78)}
+.cA .hd-date{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cA .hd-date .ic{width:15px;height:15px;color:var(--hd-gold)}
+.cA .hd-date .dot{width:3px;height:3px;border-radius:50%;background:var(--hd-gold-soft)}
+.cA .hd-tools{display:flex;align-items:center;gap:10px}
+.cA .hd-sync{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+.cA .hd-sync .sync::before{box-shadow:0 0 0 3px rgba(74,222,128,.18)}
+.cA .actions{display:flex;align-items:center;gap:2px;padding:3px;border-radius:12px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.1)}
+.cA .band .icon-btn{width:32px;height:32px;background:transparent;border:0;color:rgba(255,255,255,.85);border-radius:9px}
+.cA .band .icon-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.cA .band .icon-btn.unlocked{background:var(--hd-gold);color:#3a0b19}
+.cA .band .logout-link{display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,.85);padding:0 10px 0 8px;height:32px;border-radius:9px;border-inline-start:1px solid rgba(255,255,255,.12);margin-inline-start:4px;font-size:12.5px;white-space:nowrap}
+.cA .band .logout-link:hover{background:rgba(255,255,255,.12);color:#fff}
+.cA .band .logout-link .ic{width:15px;height:15px}
+.cA .hd-main{display:flex;flex-wrap:wrap;gap:22px 32px;align-items:center;justify-content:space-between;padding:26px 28px 38px}
+.cA .crest{display:flex;align-items:center;gap:18px;min-width:0}
+.cA .emblem{position:relative;width:74px;height:74px;flex-shrink:0;display:grid;place-items:center}
+.cA .emblem svg{position:absolute;inset:0;width:100%;height:100%;color:var(--hd-gold)}
+.cA .seal{position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(160deg,#f0d9ae,var(--hd-gold));color:#4a0e22;font-family:var(--f-kufi);font-weight:800;font-size:19px;box-shadow:0 4px 14px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.5)}
+.cA .eyebrow{font-size:11.5px;letter-spacing:.06em;color:var(--hd-gold);font-weight:600;margin-bottom:3px}
+.cA .crest h1{font-family:var(--f-kufi);font-size:26px;font-weight:800;margin:0;line-height:1.35;text-wrap:balance;text-shadow:0 2px 10px rgba(0,0,0,.2)}
+.cA .crest small{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:4px;font-size:13px;color:rgba(255,255,255,.8)}
+.cA .crest small .ic{width:15px;height:15px;color:var(--hd-gold)}
+.cA .summary{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(96px,auto);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;backdrop-filter:blur(4px);overflow:hidden}
+.cA .summary .st{display:flex;flex-direction:column;gap:2px;padding:12px 18px;border-inline-start:1px solid rgba(255,255,255,.1)}
+.cA .summary .st:first-child{border-inline-start:0}
+.cA .summary .st .lbl{display:flex;align-items:center;gap:6px;font-size:11.5px;color:rgba(255,255,255,.72)}
+.cA .summary .st .ic{width:14px;height:14px;color:var(--hd-gold)}
+.cA .summary .st b{font-family:var(--f-kufi);font-size:24px;font-weight:800;line-height:1.25;color:#fff}
+.cA .summary .st.gold{background:linear-gradient(180deg,rgba(201,164,106,.22),rgba(201,164,106,.08))}
+.cA .summary .st.gold b{color:#f3dcb0}
+.cA .summary .st.warn b{color:#ffb4a8}
+@media (max-width:760px){
+  .cA .hd-top,.cA .hd-main{padding-inline:16px}
+  .cA .crest h1{font-size:21px}
+  .cA .emblem{width:62px;height:62px}
+  .cA .summary{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+  .cA .summary .st{border-inline-start:0;border-top:1px solid rgba(255,255,255,.1)}
+}
 
 /* أدوات التصفية */
 .cA .tools{display:flex;flex-wrap:wrap;gap:10px;padding:14px 24px;align-items:center;justify-content:space-between;background:var(--a-surface)}
@@ -124,10 +160,16 @@ table{border-collapse:collapse;width:100%}
 .cA .rows tbody tr.is-off td:not(.c-num){opacity:.62}
 /* رقم السطر */
 .cA .c-num span{display:block}
-.cA .mv{display:grid;place-items:center;width:30px;height:22px;margin:2px auto;border:0;border-radius:6px;background:rgba(255,255,255,.14);color:#fff;cursor:pointer}
-.cA .mv:hover:not(:disabled){background:var(--a-gold);color:#2a1a1e}
-.cA .mv:disabled{opacity:.25;cursor:default}
-.cA .mv .ic{width:16px;height:16px;stroke-width:2.5}
+.cA .grip{display:grid;place-items:center;width:30px;height:24px;margin:0 auto 2px;border:0;border-radius:6px;background:rgba(255,255,255,.14);color:#fff;cursor:grab;touch-action:none}
+.cA .grip:hover,.cA .grip:focus-visible{background:var(--a-gold);color:#2a1a1e}
+.cA .grip .ic{width:16px;height:16px}
+.cA tr.dragging{opacity:.45}
+.cA tr.dragging td{border-style:dashed!important}
+.cA tr.drop-before td{box-shadow:0 -3px 0 var(--a-gold)}
+.cA tr.drop-after td{box-shadow:0 3px 0 var(--a-gold)}
+.cA tr.drop-before td.c-num,.cA tr.drop-after td.c-num{box-shadow:none}
+body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
+.drag-ghost{position:fixed;z-index:70;pointer-events:none;padding:10px 16px;border-radius:10px;background:var(--ui-accent);white-space:nowrap;color:#fff;font-family:var(--f-kufi);font-weight:700;font-size:14px;box-shadow:0 12px 30px rgba(0,0,0,.25);transform:translate(calc(-100% - 16px),-50%)}
 .cA .move-hint{font-size:12px;color:var(--a-muted);padding:8px 16px 0}
 .cA .c-num{width:66px;padding:0!important;text-align:center;color:#fff;background:linear-gradient(160deg,var(--a-maroon),var(--a-maroon-d))!important;border-color:transparent!important;font-family:var(--f-kufi);font-size:19px;font-weight:800;letter-spacing:.02em}
 /* اسم النظام */
@@ -217,23 +259,33 @@ table{border-collapse:collapse;width:100%}
 <div class="shell">
   <section class="cA">
     <header class="band">
-      <div class="band-row">
-        <div class="crest">
-          <div class="seal" id="brandSeal">إ</div>
-          <div>
-            <h1 id="brandName">بوابة الأنظمة الإلكترونية</h1>
-            <small><span id="brandSub">إدارة الدعوة والإرشاد الديني</span><span class="sync js-sync off">جارِ الاتصال…</span></small>
+      <div class="hd-top">
+        <div class="hd-date" id="hdDate"></div>
+        <div class="hd-tools">
+          <span class="hd-sync"><span class="sync js-sync off">جارِ الاتصال…</span></span>
+          <div class="actions">
+            <button class="icon-btn" id="lockBtn" title="مقفل — اضغط لإدخال كلمة المرور"></button>
+            <button class="icon-btn" id="settingsBtn" title="الإعدادات"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="2" fill="currentColor" stroke="none"/></svg></button>
+            <button class="icon-btn" id="refreshBtn" title="تحديث الصفحة"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></button>
+            <button class="icon-btn" id="closeBtn" title="إغلاق"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+            <a href="#" class="logout-link" id="logoutLink"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17-5-5 5-5"/><path d="M5 12h12"/></svg>تسجيل الخروج</a>
           </div>
         </div>
-        <div class="actions">
-          <button class="icon-btn" id="lockBtn" title="مقفل — اضغط لإدخال كلمة المرور"></button>
-          <button class="icon-btn" id="settingsBtn" title="الإعدادات"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="2" fill="currentColor" stroke="none"/></svg></button>
-          <button class="icon-btn" id="refreshBtn" title="تحديث الصفحة"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg></button>
-          <button class="icon-btn" id="closeBtn" title="إغلاق"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
-          <a href="#" class="logout-link" id="logoutLink">تسجيل الخروج</a>
-        </div>
       </div>
-      <div class="summary" id="summary"></div>
+      <div class="hd-main">
+        <div class="crest">
+          <div class="emblem" aria-hidden="true">
+            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor"><rect x="17" y="17" width="66" height="66" rx="4" stroke-width="1.6"/><rect x="17" y="17" width="66" height="66" rx="4" stroke-width="1.6" transform="rotate(45 50 50)"/><circle cx="50" cy="50" r="40" stroke-width=".8" stroke-dasharray="1.5 3.2" opacity=".7"/></svg>
+            <div class="seal" id="brandSeal">إ</div>
+          </div>
+          <div>
+            <div class="eyebrow">المنصة الموحّدة للأنظمة</div>
+            <h1 id="brandName">بوابة الأنظمة الإلكترونية</h1>
+            <small><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="M6.5 11a5.5 5.5 0 0 1 11 0"/><path d="M4 11h16v10H4z"/><path d="M10 21v-4a2 2 0 0 1 4 0v4"/><path d="M2 21h20"/></svg><span id="brandSub">إدارة الدعوة والإرشاد الديني</span></small>
+          </div>
+        </div>
+        <div class="summary" id="summary"></div>
+      </div>
     </header>
     <div id="stage"></div>
   </section>
@@ -423,6 +475,7 @@ const SVG = {
   trash:'<path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>',
   grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
+  grip:'<circle cx="9" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.3" fill="currentColor" stroke="none"/>',
   up:'<path d="m6 15 6-6 6 6"/>',
   down:'<path d="m6 9 6 6 6-6"/>'
 };
@@ -507,7 +560,7 @@ function setSyncStatus(ok, label){
   document.querySelectorAll('.js-sync').forEach(el=>{ el.classList.toggle('off', !ok); el.textContent = label; });
 }
 
-function catNames(){ return CATS.length ? CATS.map(c=>c.name) : CATEGORIES; }
+function catNames(){ return [...new Set(CATS.length ? CATS.map(c=>c.name) : CATEGORIES)]; }
 function catIcon(n){ return (CATS.find(c=>c.name===n)||{}).icon || ''; }
 
 function fillCategorySelect(){
@@ -585,12 +638,21 @@ const sync = () => `<span class="sync js-sync ${SYNC.ok?'':'off'}">${esc(SYNC.la
 /* ---------------- العرض الموحّد: العنّابي الرسمي + لوحة التشغيل ---------------- */
 function renderSummary(){
   const t = totals();
-  document.getElementById('summary').innerHTML = `
-    <span><b class="num">${fmt(t.all)}</b>نظام</span>
-    <span><b class="num">${fmt(t.on)}</b>متاح</span>
-    ${isUnlocked()?`<span class="${t.off?'warn':''}"><b class="num">${fmt(t.off)}</b>معطّل</span>`:''}
-    <span><b class="num">${fmt(t.cats)}</b>تصنيفات</span>
-    <span><b class="num">${fmt(t.visits)}</b>زيارة إجمالًا</span>`;
+  const st = (icon,num,lbl,cls='') => `<div class="st ${cls}"><span class="lbl">${ic(icon)}${lbl}</span><b class="num">${fmt(num)}</b></div>`;
+  document.getElementById('summary').innerHTML =
+    st('grid', t.all, 'الأنظمة') +
+    st('check', t.on, 'متاحة') +
+    (isUnlocked() ? st('ban', t.off, 'معطّلة', t.off?'warn':'') : '') +
+    st('tag', t.cats, 'التصنيفات') +
+    st('eye', t.visits, 'إجمالي الزيارات', 'gold');
+  const d = document.getElementById('hdDate');
+  if(d && !d.dataset.done){
+    const now = new Date();
+    let hij=''; try{ hij = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-latn',{day:'numeric',month:'long',year:'numeric'}).format(now); }catch(e){}
+    const greg = new Intl.DateTimeFormat('ar-QA-u-nu-latn',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(now);
+    d.innerHTML = `${ic('calendar')}<span>${greg}</span>${hij?`<span class="dot"></span><span>${hij}</span>`:''}`;
+    d.dataset.done = '1';
+  }
 }
 
 function viewMerged(rows){
@@ -609,11 +671,11 @@ function viewMerged(rows){
       ${QUICK.map(([k,l])=>`<button type="button" data-quick="${k}" aria-pressed="${filters.quick===k}">${l}</button>`).join('')}
       ${isUnlocked()?`<span class="sep"></span>${[['all','كل الحالات'],['on','المتاحة'],['off','المعطّلة']].map(([k,l])=>`<button type="button" data-status="${k}" aria-pressed="${filters.status===k}">${l}</button>`).join('')}`:''}
     </div>
-    ${isUnlocked() && !canMove() ? `<div class="move-hint">لتغيير ترتيب الأنظمة بالأسهم، اختر تبويب «الكل» وألغِ الفرز بالضغط على العمود مرة ثالثة.</div>`:''}
+    ${isUnlocked() && !canMove() ? `<div class="move-hint">لتغيير ترتيب الأنظمة بالسحب، اختر تبويب «الكل» وألغِ الفرز بالضغط على عنوان العمود مرة ثالثة.</div>`:''}
     <div class="rows-wrap scroll"><table class="rows">
       <thead><tr><th>م</th>${th('name','النظام')}<th></th>${th('status','الحالة')}${th('lastOpened','آخر استخدام')}<th></th>${th('visits','الزيارات')}</tr></thead>
-      <tbody>${rows.length ? rows.map((s,i)=>`<tr class="${s.status==='on'?'':'is-off'}">
-        <td class="c-num num">${canMove()?`<button type="button" class="mv" data-move="-1" data-id="${s.id}" title="رفع سطر للأعلى" ${i===0?'disabled':''}>${ic('up')}</button>`:''}<span>${pad(i+1)}</span>${canMove()?`<button type="button" class="mv" data-move="1" data-id="${s.id}" title="إنزال سطر للأسفل" ${i===rows.length-1?'disabled':''}>${ic('down')}</button>`:''}</td>
+      <tbody>${rows.length ? rows.map((s,i)=>`<tr class="${s.status==='on'?'':'is-off'}" data-row="${s.id}">
+        <td class="c-num num">${canMove()?`<button type="button" class="grip" data-grip="${s.id}" title="اسحب لتغيير الترتيب — أو استخدم الأسهم ↑ ↓ من لوحة المفاتيح" aria-label="نقل ${esc(s.name)}">${ic('grip')}</button>`:''}<span>${pad(i+1)}</span></td>
         <td class="c-name">
           <div class="ttl"><a class="nm" ${openAttrs(s)} title="${openLabel(s)}">${esc(s.name)}</a>${favBtn(s)}</div>
           ${s.desc?`<div class="sub">${ic('file')}<span>${esc(s.desc)}</span></div>`:''}
@@ -667,6 +729,69 @@ function renderOrderList(){
   wrap.querySelectorAll('[data-down]').forEach(btn=> btn.onclick = ()=> moveSystem(btn.dataset.down, 1));
 }
 function canMove(){ return isUnlocked() && !filters.sort.k && filters.quick==='all'; }
+async function moveRowTo(id, targetId, after){
+  if(id===targetId) return;
+  const rows = getFiltered();
+  const visIds = rows.map(r=>r.id);
+  const from = visIds.indexOf(id); if(from<0) return;
+  visIds.splice(from,1);
+  let to = visIds.indexOf(targetId); if(to<0) return;
+  if(after) to++;
+  visIds.splice(to,0,id);
+  if(visIds.join()===rows.map(r=>r.id).join()) return;
+  const before = new Map(SYSTEMS.map(s=>[s.id, s.order]));
+  const visSet = new Set(visIds);
+  const slots = SYSTEMS.map((s,k)=>visSet.has(s.id)?k:-1).filter(k=>k>=0);
+  const byId = new Map(SYSTEMS.map(s=>[s.id,s]));
+  const list = [...SYSTEMS];
+  slots.forEach((slot,n)=>{ list[slot] = byId.get(visIds[n]); });
+  list.forEach((s,k)=>{ s.order = k; });
+  SYSTEMS = list;
+  renderTable(); renderOrderList();
+  const changed = list.filter(s=>before.get(s.id)!==s.order);
+  try{ await Promise.all(changed.map(s=>updateDoc(doc(db, COL, s.id), {order:s.order}))); showToast('تم حفظ الترتيب الجديد ✓'); }
+  catch(e){ console.error(e); showToast('تعذّر حفظ الترتيب، حاول مجددًا'); }
+}
+/* السحب والإفلات بالفأرة أو اللمس من مقبض الرقم */
+let DRAG = null;
+function clearDrop(){ document.querySelectorAll('.drop-before,.drop-after').forEach(r=>r.classList.remove('drop-before','drop-after')); }
+function startDrag(e, grip){
+  const id = grip.dataset.grip, row = grip.closest('tr');
+  if(!row) return;
+  e.preventDefault();
+  try{ grip.setPointerCapture(e.pointerId); }catch(_){}
+  const name = (SYSTEMS.find(s=>s.id===id)||{}).name || '';
+  const ghost = document.createElement('div'); ghost.className='drag-ghost'; ghost.textContent = name;
+  document.body.appendChild(ghost);
+  DRAG = { id, row, grip, ghost, target:null, after:false };
+  row.classList.add('dragging'); document.body.classList.add('is-dragging');
+  moveDrag(e);
+}
+function moveDrag(e){
+  if(!DRAG) return;
+  DRAG.ghost.style.left = e.clientX+'px'; DRAG.ghost.style.top = e.clientY+'px';
+  clearDrop(); DRAG.target = null;
+  const rowsEls = [...document.querySelectorAll('tr[data-row]')];
+  for(const r of rowsEls){
+    const b = r.getBoundingClientRect();
+    if(e.clientY >= b.top-6 && e.clientY <= b.bottom+6){
+      if(r === DRAG.row) break;
+      DRAG.after = e.clientY > b.top + b.height/2;
+      DRAG.target = r.dataset.row;
+      r.classList.add(DRAG.after?'drop-after':'drop-before');
+      break;
+    }
+  }
+  const pad = 60;
+  if(e.clientY < pad) window.scrollBy(0,-12); else if(e.clientY > innerHeight-pad) window.scrollBy(0,12);
+}
+function endDrag(){
+  if(!DRAG) return;
+  const { id, target, after, row, ghost } = DRAG;
+  DRAG = null;
+  ghost.remove(); row.classList.remove('dragging'); document.body.classList.remove('is-dragging'); clearDrop();
+  if(target) requireGate(()=> moveRowTo(id, target, after));
+}
 async function moveRow(id, dir){
   const rows = getFiltered();
   const i = rows.findIndex(r=>r.id===id), j = i + dir;
@@ -820,6 +945,18 @@ async function openSystemById(id){
 
 /* ---------------- Event wiring (one delegated handler for all views) ---------------- */
 const stage = document.getElementById('stage');
+stage.addEventListener('pointerdown', e=>{ const g = e.target.closest('[data-grip]'); if(g && e.button===0) startDrag(e, g); });
+document.addEventListener('pointermove', e=>{ if(DRAG) moveDrag(e); });
+document.addEventListener('pointerup', endDrag);
+document.addEventListener('pointercancel', endDrag);
+stage.addEventListener('keydown', e=>{
+  const g = e.target.closest('[data-grip]');
+  if(g && (e.key==='ArrowUp' || e.key==='ArrowDown')){
+    e.preventDefault();
+    const id = g.dataset.grip, d = e.key==='ArrowUp' ? -1 : 1;
+    requireGate(async ()=>{ await moveRow(id, d); document.querySelector(`[data-grip="${id}"]`)?.focus(); });
+  }
+});
 stage.addEventListener('input', e=>{
   if(e.target.id==='q'){ filters.q = e.target.value; renderTable(true); }
 });
@@ -828,7 +965,6 @@ stage.addEventListener('change', e=>{
 stage.addEventListener('click', e=>{
   const el = sel => e.target.closest(sel);
   let b;
-  if((b = el('[data-move]'))){ if(!b.disabled){ const id=b.dataset.id, d=+b.dataset.move; requireGate(()=> moveRow(id, d)); } return; }
   if((b = el('[data-open]'))){ e.preventDefault(); openSystemById(b.dataset.id); return; }
   if((b = el('[data-fav]'))){
     const s = SYSTEMS.find(x=>x.id===b.dataset.fav);

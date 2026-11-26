@@ -229,6 +229,40 @@ body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
   .cA .searchbox{width:100%}
 }
 
+/* ---- سطور نحيفة (Q03) ---- */
+.cA table.rows{border-spacing:0 6px}
+.cA .rows tbody td{padding:7px 14px}
+.cA .c-num{width:92px;line-height:1.1}
+.cA .c-num .n-cat{display:block;max-width:84px;margin:0 auto 3px;padding:1px 7px;border-radius:99px;background:rgba(255,255,255,.16);color:#f3dcb0;font-family:var(--f-ui);font-size:10.5px;font-weight:600;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cA .c-num .n-no{display:block;font-size:17px}
+.cA .grip{height:18px;margin-bottom:1px}
+.cA .c-name{min-width:260px;max-width:420px}
+.cA .nm{font-size:14.5px;line-height:1.35}
+.cA .sub{display:block;margin-top:1px;font-size:12px;font-weight:500;color:var(--a-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px}
+.cA .c-logo{width:62px}
+.cA .logo{width:38px;height:38px;border-radius:9px}
+.cA .logo .ic{width:19px;height:19px}
+.cA .logo .emo{font-size:18px}
+.cA .line{font-size:12.5px}
+.cA .open{padding:5px 13px;border-radius:8px;font-size:12.5px}
+.cA .acts{flex-wrap:nowrap}
+.cA .c-visits{width:84px;padding:6px 8px!important;white-space:nowrap}
+.cA .c-visits .ic{width:15px;height:15px;vertical-align:-3px;margin-inline-end:4px}
+.cA .c-visits b{display:inline;font-size:16px}
+.cA table.rows{min-width:880px}
+@media (max-width:760px){
+  .cA .rows tbody tr{grid-template-columns:72px minmax(0,1fr) 52px}
+  .cA .rows .c-num{grid-row:1 / span 3}
+  .cA .rows .c-name{grid-row:1;max-width:none}
+  .cA .rows .c-logo{grid-row:1}
+  .cA .rows .c-logo .logo{width:36px;height:36px}
+  .cA .rows .c-stat{grid-column:2;grid-row:2;padding-block:0 4px}
+  .cA .rows .c-last{grid-column:3;grid-row:2;padding-block:0 4px;display:none}
+  .cA .rows .c-act{grid-column:2;grid-row:3;padding-block:6px}
+  .cA .rows .c-visits{grid-column:3;grid-row:2 / span 2;flex-direction:column}
+  .cA .rows .c-visits b{font-size:14px}
+  .cA .sub{max-width:100%}
+}
 /* ============ النوافذ المنبثقة والإشعارات ============ */
 .modal-overlay{position:fixed;inset:0;background:rgba(10,12,11,.5);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
 .modal-overlay.show{display:flex}
@@ -409,7 +443,7 @@ body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
 
 <script type="module">
 /* رقم إصدار البوابة — يُرفع مع كل تحديث: Q01، Q02، … */
-const APP_VERSION = "Q02";
+const APP_VERSION = "Q03";
 /* ---------------- Firebase (Firestore + Auth) — project: droub-55931 ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
@@ -683,28 +717,18 @@ function viewMerged(rows){
     </div>
     ${isUnlocked() && !canMove() ? `<div class="move-hint">لتغيير ترتيب الأنظمة بالسحب، اختر تبويب «الكل» وألغِ الفرز بالضغط على عنوان العمود مرة ثالثة.</div>`:''}
     <div class="rows-wrap scroll"><table class="rows">
-      <thead><tr><th>م</th>${th('name','النظام')}<th></th>${th('status','الحالة')}${th('lastOpened','آخر استخدام لك')}<th></th>${th('visits','الزيارات')}</tr></thead>
+      <thead><tr><th>التصنيف</th>${th('name','النظام')}<th></th>${th('status','الحالة')}${th('lastOpened','آخر استخدام لك')}<th></th>${th('visits','الزيارات')}</tr></thead>
       <tbody>${rows.length ? rows.map((s,i)=>`<tr class="${s.status==='on'?'':'is-off'}" data-row="${s.id}">
-        <td class="c-num num">${canMove()?`<button type="button" class="grip" data-grip="${s.id}" title="اسحب لتغيير الترتيب — أو استخدم الأسهم ↑ ↓ من لوحة المفاتيح" aria-label="نقل ${esc(s.name)}">${ic('grip')}</button>`:''}<span>${pad(i+1)}</span></td>
+        <td class="c-num num"><span class="n-cat" title="${esc(s.category)}">${esc(s.category)}</span>${canMove()?`<button type="button" class="grip" data-grip="${s.id}" title="اسحب لتغيير الترتيب — أو استخدم الأسهم ↑ ↓ من لوحة المفاتيح" aria-label="نقل ${esc(s.name)}">${ic('grip')}</button>`:''}<span class="n-no">${pad(i+1)}</span></td>
         <td class="c-name">
           <div class="ttl"><a class="nm" ${openAttrs(s)} title="${openLabel(s)}">${esc(s.name)}</a>${favBtn(s)}</div>
-          ${s.desc?`<div class="sub">${ic('file')}<span>${esc(s.desc)}</span></div>`:''}
-          <div class="ds">${esc(s.category)}</div>
+          ${s.desc?`<div class="sub" title="${esc(s.desc)}">${esc(s.desc)}</div>`:''}
         </td>
         <td class="c-logo"><a class="logo" ${openAttrs(s)} tabindex="-1" aria-hidden="true">${sysIcon(s.icon)}</a></td>
-        <td class="c-stat">
-          <div class="line ${s.status==='on'?'ok':'off'}">${ic(s.status==='on'?'check':'ban')}${s.status==='on'?'متاح للدخول':'معطّل مؤقتًا'}</div>
-          <div class="line muted">${ic(s.url&&s.url!=='#'?'globe':'file')}${s.url&&s.url!=='#'?'رابط إلكتروني':(s.htmlContent?'ملف مرفوع':'لا يوجد رابط')}</div>
-        </td>
-        <td class="c-last">
-          <div class="line ${MY_OPENS[s.id]?'strong':'muted'}">${ic('clock')}${MY_OPENS[s.id]?`فتحتَه ${timeAgo(MY_OPENS[s.id])}`:'لم تفتحه بعد'}</div>
-          <div class="line muted">${ic('calendar')}آخر تحديث ${dateAr(s.updated)}</div>
-        </td>
-        <td class="c-act">
-          <div class="acts"><a class="open" ${openAttrs(s)}>${ic('enter')}${openLabel(s)==='فتح الملف'?'فتح الملف':'دخول النظام'}</a></div>
-          ${isUnlocked()?`<div class="admin-row">${adminBtns(s,'ghost')}</div>`:''}
-        </td>
-        <td class="c-visits">${ic('eye')}<b class="num">${fmt(s.visits)}</b><small>زيارة</small></td>
+        <td class="c-stat"><div class="line ${s.status==='on'?'ok':'off'}" title="${s.url&&s.url!=='#'?'رابط إلكتروني':(s.htmlContent?'ملف مرفوع':'لا يوجد رابط')}">${ic(s.status==='on'?'check':'ban')}${s.status==='on'?'متاح':'معطّل'}</div></td>
+        <td class="c-last"><div class="line ${MY_OPENS[s.id]?'strong':'muted'}" title="آخر تحديث ${dateAr(s.updated)}">${ic('clock')}${MY_OPENS[s.id]?`فتحتَه ${timeAgo(MY_OPENS[s.id])}`:'لم تفتحه بعد'}</div></td>
+        <td class="c-act"><div class="acts">${isUnlocked()?adminBtns(s,'ghost'):''}<a class="open" ${openAttrs(s)}>${ic('enter')}${openLabel(s)==='فتح الملف'?'فتح الملف':'دخول'}</a></div></td>
+        <td class="c-visits">${ic('eye')}<b class="num">${fmt(s.visits)}</b></td>
       </tr>`).join('') : `<tr class="empty-row"><td colspan="7">${emptyText()}</td></tr>`}</tbody>
     </table></div>
     <div class="foot"><span>${QUICK_TITLES[filters.quick]} — يظهر ${fmt(rows.length)} من ${fmt(visible.length)} نظام</span><span>اضغط على اسم النظام للدخول، وعلى عنوان العمود للفرز</span></div>`;

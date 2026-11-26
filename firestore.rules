@@ -101,10 +101,14 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // أنظمة قديمة متوقفة: eventsSystem و talabat-almkhzn و spaces — مقفلة كاملة (البيانات محفوظة، ولا يصل إليها أحد)
+    // لأنها مذكورة في قائمة الاستثناء أدناه ولا توجد لها قاعدة تسمح بشيء
+
     // أي بيانات أخرى في نفس المشروع تبقى كما كانت
     match /{col}/{doc=**} {
       allow read, write: if !(col in ["rqaba", "appState", "appAccess", "appLogin",
-        "portal_systems", "portal_categories", "portal_meta", "portal_admins", "portal_users", "portal_log"]);
+        "portal_systems", "portal_categories", "portal_meta", "portal_admins", "portal_users", "portal_log",
+        "eventsSystem", "talabat-almkhzn", "spaces"]);
     }
   }
 }

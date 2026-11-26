@@ -46,6 +46,14 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['visits', 'lastOpened'])
         && request.resource.data.visits == resource.data.get('visits', 0) + 1
         && request.resource.data.lastOpened is int
+        // زيارة واحدة لكل مستخدم كل 10 دقائق: تُسجَّل مع فتحه في نفس العملية
+        && getAfter(/databases/$(database)/documents/portal_users/$(request.auth.uid)).data.opens[id] == request.time
+        && (
+          !exists(/databases/$(database)/documents/portal_users/$(request.auth.uid))
+          || !('opens' in get(/databases/$(database)/documents/portal_users/$(request.auth.uid)).data)
+          || !(id in get(/databases/$(database)/documents/portal_users/$(request.auth.uid)).data.opens)
+          || get(/databases/$(database)/documents/portal_users/$(request.auth.uid)).data.opens[id] < request.time - duration.value(10, 'm')
+        )
       );
     }
 
@@ -84,10 +92,19 @@ service cloud.firestore {
       allow read, write: if signedIn() && request.auth.uid == uid;
     }
 
+    // سجل النشاط: يكتبه المدير باسمه فقط، ولا يُعدَّل ولا يُحذف
+    match /portal_log/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.by == googleEmail()
+        && request.resource.data.at == request.time;
+      allow update, delete: if false;
+    }
+
     // أي بيانات أخرى في نفس المشروع تبقى كما كانت
     match /{col}/{doc=**} {
       allow read, write: if !(col in ["rqaba", "appState", "appAccess", "appLogin",
-        "portal_systems", "portal_categories", "portal_meta", "portal_admins", "portal_users"]);
+        "portal_systems", "portal_categories", "portal_meta", "portal_admins", "portal_users", "portal_log"]);
     }
   }
 }

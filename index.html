@@ -116,6 +116,9 @@ table{border-collapse:collapse;width:100%}
 @media (max-width:760px){
   .cA .hd-top,.cA .hd-main{padding-inline:16px}
   .cA .crest h1{font-size:21px}
+  .cA .hd-tools{flex-wrap:wrap;width:100%;justify-content:space-between}
+  .cA .band .logout-link span{display:none}
+  .cA .band .logout-link{padding:0 8px}
   .cA .emblem{width:62px;height:62px}
   .cA .summary{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
   .cA .summary .st{border-inline-start:0;border-top:1px solid rgba(255,255,255,.1)}
@@ -251,6 +254,33 @@ body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
 .order-row .nm,.cat-row .nm{flex:1}
 .mini-btn{width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;cursor:pointer}
 .mini-btn:disabled{opacity:.35;cursor:default}
+.log-list{display:flex;flex-direction:column;max-height:260px;overflow:auto}
+.log-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+.log-when{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.log-what{min-width:0}
+.log-who{grid-column:2;color:var(--muted);font-size:11.5px;text-align:right}
+@media (max-width:760px){
+  .cA .rows-wrap{overflow:visible;padding-inline:12px}
+  .cA table.rows{min-width:0;border-spacing:0 12px}
+  .cA .rows thead{display:none}
+  .cA .rows tbody tr{display:grid;grid-template-columns:52px minmax(0,1fr) 72px;border-radius:12px;overflow:hidden;border:1px solid var(--a-line);background:var(--a-surface)}
+  .cA .rows tbody tr:hover{transform:none}
+  .cA .rows tbody td{border:0!important;border-radius:0!important;padding:10px 12px}
+  .cA .rows tbody td+td{border-inline-start:0!important}
+  .cA .rows .c-num{grid-column:1;grid-row:1 / span 4;display:flex;flex-direction:column;align-items:center;justify-content:center;width:auto}
+  .cA .rows .c-name{grid-column:2;grid-row:1;min-width:0}
+  .cA .rows .c-logo{grid-column:3;grid-row:1;width:auto;padding-inline:6px}
+  .cA .rows .c-logo .logo{width:46px;height:46px}
+  .cA .rows .c-stat{grid-column:2 / span 2;grid-row:2;display:flex;flex-wrap:wrap;gap:4px 14px;padding-top:0}
+  .cA .rows .c-last{grid-column:2 / span 2;grid-row:3;display:flex;flex-wrap:wrap;gap:4px 14px;padding-top:0}
+  .cA .rows .c-stat .line+.line,.cA .rows .c-last .line+.line{margin-top:0}
+  .cA .rows .c-act{grid-column:2;grid-row:4;width:auto;border-top:1px solid var(--a-line)!important}
+  .cA .rows .c-act .acts{justify-content:flex-start}
+  .cA .rows .c-visits{grid-column:3;grid-row:4;width:auto;border-top:1px solid var(--a-line)!important;border-inline-start:1.5px dashed var(--a-gold)!important;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px!important}
+  .cA .rows .c-visits b{font-size:18px}
+  .cA .rows .empty-row td{grid-column:1 / -1}
+  .cA .rows .empty-row{display:block}
+}
 .toast{position:fixed;bottom:max(20px,env(safe-area-inset-bottom,0px));left:50%;transform:translate(-50%,20px);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:all .25s;z-index:60;max-width:calc(100% - 32px);text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -367,6 +397,11 @@ body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
           <button class="act-btn primary" id="addAdminBtn">إضافة</button>
         </div>
       </div>
+      <div class="settings-section">
+        <h4>سجل النشاط</h4>
+        <p style="font-size:12px;color:var(--muted);margin:0;">آخر 40 عملية قام بها المديرون. لا يمكن تعديل السجل أو حذفه.</p>
+        <div id="logList" class="log-list"></div>
+      </div>
     </div>
     <div class="modal-foot"><button class="act-btn" id="settingsCloseBottom">إغلاق</button></div>
   </div>
@@ -374,11 +409,11 @@ body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
 
 <script type="module">
 /* رقم إصدار البوابة — يُرفع مع كل تحديث: Q01، Q02، … */
-const APP_VERSION = "Q01";
+const APP_VERSION = "Q02";
 /* ---------------- Firebase (Firestore + Auth) — project: droub-55931 ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, increment, writeBatch, arrayUnion, arrayRemove, deleteField
+  getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, increment, writeBatch, arrayUnion, arrayRemove, deleteField, serverTimestamp, query, orderBy, limit
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { getAuth, signInAnonymously, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
@@ -408,7 +443,11 @@ let IS_ADMIN = false;     // حساب Google مسجّل في قائمة المد
 let OWNER_EXISTS = true;  // هل عُيِّن مالك البوابة بعد؟
 let FAVS = new Set();     // مفضلة المستخدم الحالي فقط
 let ADMINS = [];
-let unsubFav = null, unsubAdmins = null;
+let unsubFav = null, unsubAdmins = null, unsubLog = null;
+let MY_OPENS = {};        // آخر مرة فتح فيها المستخدم الحالي كل نظام
+let LOGS = [];
+const logCol = collection(db, "portal_log");
+const VISIT_GAP_MIN = 10;  // لا تُحتسب زيارة جديدة لنفس المستخدم قبل 10 دقائق
 let CATS = [];
 let SYNC = { ok:false, label:"جارِ الاتصال…" };
 let LOADED = false;
@@ -556,11 +595,12 @@ function getFiltered(){
     return true;
   });
   if(filters.quick==="favorites") list = list.filter(s=>FAVS.has(s.id));
-  else if(filters.quick==="recent") list = list.filter(s=>s.lastOpened).sort((a,b)=>(b.lastOpened||0)-(a.lastOpened||0));
+  else if(filters.quick==="recent") list = list.filter(s=>MY_OPENS[s.id]).sort((a,b)=>toMs(MY_OPENS[b.id])-toMs(MY_OPENS[a.id]));
   else if(filters.quick==="popular") list = [...list].sort((a,b)=>(b.visits||0)-(a.visits||0));
   else if(filters.quick==="new") list = [...list].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   if(filters.sort.k){
     const k = filters.sort.k, dir = filters.sort.dir;
+    if(k==='lastOpened') return [...list].sort((a,b)=>(toMs(MY_OPENS[a.id])-toMs(MY_OPENS[b.id]))*dir);
     list = [...list].sort((a,b)=>{
       const x = a[k] ?? '', y = b[k] ?? '';
       return (typeof x==='number' && typeof y==='number' ? x-y : String(x).localeCompare(String(y),'ar')) * dir;
@@ -574,7 +614,9 @@ function esc(str){
 }
 const fmt = n => Number(n||0).toLocaleString('ar');
 function dateAr(d){ if(!d) return '—'; const p = String(d).split('-'); return p.length===3 ? `${+p[2]}/${+p[1]}/${p[0]}` : esc(d); }
+const toMs = t => !t ? 0 : typeof t==="number" ? t : (t.toMillis ? t.toMillis() : (t.seconds ? t.seconds*1000 : 0));
 function timeAgo(ts){
+  ts = toMs(ts);
   if(!ts) return "";
   const diffMin = Math.floor((Date.now()-ts)/60000);
   if(diffMin < 1) return "الآن";
@@ -585,8 +627,8 @@ function timeAgo(ts){
 }
 
 /* ---------------- Shared pieces for the three views ---------------- */
-const QUICK = [['all','الكل'],['favorites','★ المفضلة'],['recent','آخر استخدام'],['popular','الأكثر استخدامًا'],['new','المضافة حديثًا']];
-const QUICK_TITLES = { all:"الأنظمة والمواقع", favorites:"المفضلة", recent:"آخر الأنظمة استخدامًا", popular:"الأكثر استخدامًا", new:"المضافة حديثًا" };
+const QUICK = [['all','الكل'],['favorites','★ المفضلة'],['recent','آخر ما فتحتُه'],['popular','الأكثر استخدامًا'],['new','المضافة حديثًا']];
+const QUICK_TITLES = { all:"الأنظمة والمواقع", favorites:"المفضلة", recent:"آخر ما فتحتَه", popular:"الأكثر استخدامًا", new:"المضافة حديثًا" };
 function totals(){
   const on = SYSTEMS.filter(s=>s.status==='on').length;
   return { all:SYSTEMS.length, on, off:SYSTEMS.length-on, cats:CATEGORIES.length, visits:SYSTEMS.reduce((a,s)=>a+(s.visits||0),0) };
@@ -641,7 +683,7 @@ function viewMerged(rows){
     </div>
     ${isUnlocked() && !canMove() ? `<div class="move-hint">لتغيير ترتيب الأنظمة بالسحب، اختر تبويب «الكل» وألغِ الفرز بالضغط على عنوان العمود مرة ثالثة.</div>`:''}
     <div class="rows-wrap scroll"><table class="rows">
-      <thead><tr><th>م</th>${th('name','النظام')}<th></th>${th('status','الحالة')}${th('lastOpened','آخر استخدام')}<th></th>${th('visits','الزيارات')}</tr></thead>
+      <thead><tr><th>م</th>${th('name','النظام')}<th></th>${th('status','الحالة')}${th('lastOpened','آخر استخدام لك')}<th></th>${th('visits','الزيارات')}</tr></thead>
       <tbody>${rows.length ? rows.map((s,i)=>`<tr class="${s.status==='on'?'':'is-off'}" data-row="${s.id}">
         <td class="c-num num">${canMove()?`<button type="button" class="grip" data-grip="${s.id}" title="اسحب لتغيير الترتيب — أو استخدم الأسهم ↑ ↓ من لوحة المفاتيح" aria-label="نقل ${esc(s.name)}">${ic('grip')}</button>`:''}<span>${pad(i+1)}</span></td>
         <td class="c-name">
@@ -650,12 +692,12 @@ function viewMerged(rows){
           <div class="ds">${esc(s.category)}</div>
         </td>
         <td class="c-logo"><a class="logo" ${openAttrs(s)} tabindex="-1" aria-hidden="true">${sysIcon(s.icon)}</a></td>
-        <td>
+        <td class="c-stat">
           <div class="line ${s.status==='on'?'ok':'off'}">${ic(s.status==='on'?'check':'ban')}${s.status==='on'?'متاح للدخول':'معطّل مؤقتًا'}</div>
           <div class="line muted">${ic(s.url&&s.url!=='#'?'globe':'file')}${s.url&&s.url!=='#'?'رابط إلكتروني':(s.htmlContent?'ملف مرفوع':'لا يوجد رابط')}</div>
         </td>
-        <td>
-          <div class="line ${s.lastOpened?'strong':'muted'}">${ic('clock')}${s.lastOpened?`فُتح ${timeAgo(s.lastOpened)}`:'لم يُفتح بعد'}</div>
+        <td class="c-last">
+          <div class="line ${MY_OPENS[s.id]?'strong':'muted'}">${ic('clock')}${MY_OPENS[s.id]?`فتحتَه ${timeAgo(MY_OPENS[s.id])}`:'لم تفتحه بعد'}</div>
           <div class="line muted">${ic('calendar')}آخر تحديث ${dateAr(s.updated)}</div>
         </td>
         <td class="c-act">
@@ -717,7 +759,7 @@ async function moveRowTo(id, targetId, after){
   SYSTEMS = list;
   renderTable(); renderOrderList();
   const changed = list.filter(s=>before.get(s.id)!==s.order);
-  try{ await Promise.all(changed.map(s=>updateDoc(doc(db, COL, s.id), {order:s.order}))); showToast('تم حفظ الترتيب الجديد ✓'); }
+  try{ await Promise.all(changed.map(s=>updateDoc(doc(db, COL, s.id), {order:s.order}))); showToast('تم حفظ الترتيب الجديد ✓'); logAction('تغيير الترتيب', (byId.get(id)||{}).name); }
   catch(e){ console.error(e); showToast('تعذّر حفظ الترتيب، حاول مجددًا'); }
 }
 /* السحب والإفلات بالفأرة أو اللمس من مقبض الرقم */
@@ -803,7 +845,7 @@ function renderCatManageList(){
       const c = CATS.find(x=>x.id===btn.dataset.editcat); if(!c) return;
       const newName = prompt('اسم التصنيف:', c.name); if(newName===null) return;
       const newIcon = prompt('أيقونة التصنيف (رمز تعبيري):', c.icon||'🏷️'); if(newIcon===null) return;
-      try{ await updateDoc(doc(db,'portal_categories', c.id), {name:newName.trim()||c.name, icon:newIcon.trim()||'🏷️'}); showToast('تم تحديث التصنيف'); }
+      try{ await updateDoc(doc(db,'portal_categories', c.id), {name:newName.trim()||c.name, icon:newIcon.trim()||'🏷️'}); showToast('تم تحديث التصنيف'); logAction('تعديل تصنيف', newName.trim()||c.name); }
       catch(e){ console.error(e); showToast('تعذّر تحديث التصنيف'); }
     });
   });
@@ -811,7 +853,7 @@ function renderCatManageList(){
     btn.onclick = ()=> requireGate(async ()=>{
       const c = CATS.find(x=>x.id===btn.dataset.delcat); if(!c) return;
       if(!confirm(`حذف تصنيف "${c.name}"؟ (لن يؤثر على الأنظمة المستخدمة له حاليًا)`)) return;
-      try{ await deleteDoc(doc(db,'portal_categories', c.id)); showToast('تم حذف التصنيف'); }
+      try{ await deleteDoc(doc(db,'portal_categories', c.id)); showToast('تم حذف التصنيف'); logAction('حذف تصنيف', c.name); }
       catch(e){ console.error(e); showToast('تعذّر حذف التصنيف'); }
     });
   });
@@ -875,8 +917,8 @@ async function saveModal(){
   if(pendingHtml){ data.htmlFileName = pendingHtml.name; data.htmlContent = pendingHtml.content; }
   else if(!editingId){ data.htmlFileName = null; data.htmlContent = null; }
   try{
-    if(editingId){ await updateDoc(doc(db, COL, editingId), data); showToast('تم تحديث النظام بنجاح'); }
-    else{ await setDoc(doc(db, COL, newId()), data); showToast('تمت إضافة النظام بنجاح'); }
+    if(editingId){ await updateDoc(doc(db, COL, editingId), data); showToast('تم تحديث النظام بنجاح'); logAction('تعديل نظام', data.name); }
+    else{ await setDoc(doc(db, COL, newId()), data); showToast('تمت إضافة النظام بنجاح'); logAction('إضافة نظام', data.name); }
     closeModal();
   }catch(e){ console.error(e); showToast('تعذّر حفظ النظام، حاول مجددًا'); }
 }
@@ -887,13 +929,14 @@ async function toggleStatus(id){
   try{
     await updateDoc(doc(db, COL, id), { status: s.status==='on' ? 'off' : 'on', updated: todayStr() });
     showToast(`تم ${s.status==='on' ? 'تعطيل' : 'تفعيل'} "${s.name}"`);
+    logAction(s.status==='on' ? 'تعطيل نظام' : 'تفعيل نظام', s.name);
   }catch(e){ console.error(e); showToast('تعذّر تحديث الحالة'); }
 }
 async function deleteSystem(id){
   const s = SYSTEMS.find(x=>x.id===id);
   if(!s) return;
   if(!confirm(`هل تريد حذف "${s.name}" نهائيًا؟`)) return;
-  try{ await deleteDoc(doc(db, COL, id)); showToast(`تم حذف "${s.name}"`); }
+  try{ await deleteDoc(doc(db, COL, id)); showToast(`تم حذف "${s.name}"`); logAction('حذف نظام', s.name); }
   catch(e){ console.error(e); showToast('تعذّر حذف النظام'); }
 }
 
@@ -908,7 +951,15 @@ async function openSystemById(id){
     showToast('لم يتم ربط رابط فعلي أو ملف HTML بهذا النظام بعد — عدّله لإضافته');
     return;
   }
-  try{ await updateDoc(doc(db, COL, id), { visits: increment(1), lastOpened: Date.now() }); }catch(e){ console.error(e); }
+  if(!USER) return;
+  const prev = toMs(MY_OPENS[id]);
+  MY_OPENS[id] = Date.now(); renderTable();
+  try{
+    const b = writeBatch(db);
+    b.set(doc(db, 'portal_users', USER.uid), { opens: { [id]: serverTimestamp() } }, {merge:true});
+    if(!prev || Date.now()-prev > VISIT_GAP_MIN*60000) b.update(doc(db, COL, id), { visits: increment(1), lastOpened: Date.now() });
+    await b.commit();
+  }catch(e){ console.error(e); }
 }
 
 /* ---------------- Event wiring (one delegated handler for all views) ---------------- */
@@ -1033,6 +1084,19 @@ async function googleSignIn(){
 }
 
 /* يتحقق من الصلاحية بعد كل تغيّر في الحساب */
+/* سجل النشاط: يُسجَّل كل تغيير يقوم به مدير */
+function logAction(action, target=''){
+  if(!IS_ADMIN || !USER) return;
+  addDoc(logCol, { action, target: String(target||'').slice(0,200), by: USER.email.toLowerCase(), name: USER.displayName||'', at: serverTimestamp() })
+    .catch(e=>console.error('log', e));
+}
+function renderLog(){
+  const wrap = document.getElementById('logList'); if(!wrap) return;
+  const fmtTs = t => { const ms = toMs(t); return ms ? new Intl.DateTimeFormat('ar-QA-u-nu-latn',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).format(ms) : '…'; };
+  wrap.innerHTML = LOGS.length ? LOGS.map(l=>`
+    <div class="log-row"><span class="log-when">${fmtTs(l.at)}</span><span class="log-what"><b>${esc(l.action)}</b>${l.target?` — ${esc(l.target)}`:''}</span><span class="log-who" dir="ltr">${esc(l.by)}</span></div>`).join('')
+    : `<div style="color:var(--muted);font-size:12.5px;">لا يوجد نشاط مسجّل بعد</div>`;
+}
 async function refreshRole(){
   IS_ADMIN = false; OWNER_EXISTS = true;
   if(isGoogleUser()){
@@ -1040,8 +1104,11 @@ async function refreshRole(){
     try{ OWNER_EXISTS = (await getDoc(ownerDocRef)).exists(); }catch(e){ OWNER_EXISTS = true; }
   }
   if(unsubAdmins){ unsubAdmins(); unsubAdmins = null; }
+  if(unsubLog){ unsubLog(); unsubLog = null; }
   if(IS_ADMIN){
     unsubAdmins = onSnapshot(adminsCol, snap=>{ ADMINS = snap.docs.map(d=>({id:d.id, ...d.data()})); renderAdminList(); }, err=>console.error(err));
+    if(unsubLog) unsubLog();
+    unsubLog = onSnapshot(query(logCol, orderBy('at','desc'), limit(40)), snap=>{ LOGS = snap.docs.map(d=>d.data()); renderLog(); }, err=>console.error(err));
     // إزالة كلمة المرور القديمة المكشوفة من قاعدة البيانات
     getDoc(settingsDocRef).then(s=>{ if(s.exists() && 'adminPassword' in s.data()) updateDoc(settingsDocRef, {adminPassword: deleteField()}); }).catch(()=>{});
   }
@@ -1069,6 +1136,7 @@ async function requireGate(action){
     try{
       await claimOwnership(); await refreshRole();
       showToast(`تم تعيين ${USER.email} مالكًا ومديرًا للبوابة ✓`);
+      logAction('تعيين مالك البوابة', USER.email);
     }catch(e){ console.error(e); showToast('تعذّر تعيين المدير، حاول مجددًا'); return; }
   }
   if(IS_ADMIN){ try{ sessionStorage.setItem('admin_mode','1'); }catch(e){} updateLockIcon(); renderTable(); action(); }
@@ -1105,7 +1173,7 @@ function renderAdminList(){
     </div>`).join('') || `<div style="color:var(--muted);font-size:12.5px;">لا يوجد مديرون</div>`;
   wrap.querySelectorAll('[data-deladmin]').forEach(btn=>{
     btn.onclick = async ()=>{
-      try{ await deleteDoc(doc(adminsCol, btn.dataset.deladmin)); showToast('تمت إزالة المدير'); }
+      try{ await deleteDoc(doc(adminsCol, btn.dataset.deladmin)); showToast('تمت إزالة المدير'); logAction('إزالة مدير', btn.dataset.deladmin); }
       catch(e){ console.error(e); showToast('تعذّرت إزالة المدير'); }
     };
   });
@@ -1117,6 +1185,7 @@ document.getElementById('addAdminBtn').addEventListener('click', ()=> requireGat
     await setDoc(doc(adminsCol, email), { email, name:'', addedBy: USER.email.toLowerCase(), at: Date.now() });
     document.getElementById('newAdminEmail').value = '';
     showToast('تمت إضافة المدير ✓ — يدخل بحساب Google الخاص به');
+    logAction('إضافة مدير', email);
   }catch(e){ console.error(e); showToast('تعذّرت إضافة المدير'); }
 }));
 
@@ -1127,7 +1196,7 @@ document.getElementById('settingsBtn').addEventListener('click', ()=> requireGat
   document.getElementById('set_icon').value = PORTAL_ICON;
   renderOrderList();
   renderCatManageList();
-  renderAdminList();
+  renderAdminList(); renderLog();
   document.getElementById('settingsModal').classList.add('show');
 }));
 function closeSettings(){ document.getElementById('settingsModal').classList.remove('show'); }
@@ -1142,6 +1211,7 @@ document.getElementById('saveBranding').addEventListener('click', async ()=>{
   try{
     await setDoc(settingsDocRef, {portalName:name, portalIcon:icon, portalSub:sub}, {merge:true});
     showToast('تم حفظ اسم وأيقونة البوابة ✓');
+    logAction('تعديل اسم البوابة', name);
   }catch(e){ console.error(e); showToast('تعذّر الحفظ'); }
 });
 document.getElementById('addCatBtn').addEventListener('click', ()=> requireGate(async ()=>{
@@ -1153,6 +1223,7 @@ document.getElementById('addCatBtn').addEventListener('click', ()=> requireGate(
     document.getElementById('newCatName').value = '';
     document.getElementById('newCatIcon').value = '';
     showToast('تمت إضافة التصنيف ✓');
+    logAction('إضافة تصنيف', name);
   }catch(e){ console.error(e); showToast('تعذّر إضافة التصنيف'); }
 }));
 
@@ -1170,8 +1241,10 @@ onAuthStateChanged(auth, async u=>{
   if(!subscribed){ subscribed = true; subscribe(); }
   if(unsubFav){ unsubFav(); unsubFav = null; }
   FAVS = new Set();
+  MY_OPENS = {};
   unsubFav = onSnapshot(doc(db, 'portal_users', u.uid), s=>{
-    FAVS = new Set((s.exists() && s.data().favorites) || []); renderTable();
+    const d = s.exists() ? s.data() : {};
+    FAVS = new Set(d.favorites || []); MY_OPENS = d.opens || {}; renderTable();
   }, err=>console.error(err));
   await refreshRole();
 });

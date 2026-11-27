@@ -444,6 +444,8 @@ body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="act-btn primary" id="bkChoose">اختيار مكان الحفظ</button>
           <button class="act-btn" id="bkNow">نسخ احتياطي الآن</button>
+          <button class="act-btn" id="bkRestore">استعادة من نسخة</button>
+          <input type="file" id="bkFile" accept=".json,application/json" hidden>
         </div>
       </div>
 
@@ -459,7 +461,7 @@ body.is-dragging,body.is-dragging *{cursor:grabbing!important;user-select:none}
 
 <script type="module">
 /* رقم إصدار البوابة — يُرفع مع كل تحديث: Q01، Q02، … */
-const APP_VERSION = "Q04";
+const APP_VERSION = "Q05";
 /* ---------------- Firebase (Firestore + Auth) — project: droub-55931 ---------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
@@ -1200,6 +1202,12 @@ async function runBackup(fromClick){
       const fh = await BK.handle.getFileHandle(name, {create:true});
       const w = await fh.createWritable(); await w.write(json); await w.close();
     }
+    /* الاحتفاظ بآخر 30 نسخة يومية فقط */
+    try{
+      const old = [];
+      for await (const [n, hd] of BK.handle.entries()) if(hd.kind==='file' && /^بوابة-الأنظمة-نسخة-احتياطية-\d{4}-\d{2}-\d{2}\.json$/.test(n)) old.push(n);
+      old.sort().reverse().slice(30).forEach(n=> BK.handle.removeEntry(n).catch(()=>{}));
+    }catch(e){}
     BK.last = Date.now(); await bkSet('last', BK.last);
     bkRender(false);
     showToast(`تم تحديث النسخة الاحتياطية بتاريخ ${bkFmt(BK.last)}`);
@@ -1232,6 +1240,25 @@ document.getElementById('bkChoose').addEventListener('click', async ()=>{
     logAction('اختيار مكان النسخ الاحتياطي', h.name);
     await runBackup(true);
   }catch(e){ if(e && e.name!=='AbortError'){ console.error(e); showToast('تعذّر اختيار المجلد'); } }
+});
+/* الاستعادة: دمج آمن — يُعيد الأنظمة والتصنيفات واسم البوابة من النسخة، ولا يحذف ما أُضيف بعدها */
+document.getElementById('bkRestore').addEventListener('click', ()=> requireGate(()=> document.getElementById('bkFile').click()));
+document.getElementById('bkFile').addEventListener('change', async e=>{
+  const f = e.target.files[0]; e.target.value = '';
+  if(!f) return;
+  let d;
+  try{ d = JSON.parse(await f.text()); }catch(err){ showToast('الملف ليس نسخة احتياطية صالحة'); return; }
+  if(!d || !Array.isArray(d.systems)){ showToast('الملف ليس نسخة احتياطية للبوابة'); return; }
+  const when = d.createdAt ? bkFmt(new Date(d.createdAt).getTime()) : 'غير معروف';
+  if(!confirm(`استعادة نسخة بتاريخ ${when}؟\n\nسيُعاد ${d.systems.length} نظامًا و${(d.categories||[]).length} تصنيفًا إلى حالتها في النسخة.\nالأنظمة المضافة بعد هذه النسخة تبقى كما هي.`)) return;
+  try{
+    const clean = o => { const x = Object.assign({}, o); delete x.id; return x; };
+    for(const s of d.systems) if(s && s.id) await setDoc(doc(db, COL, s.id), clean(s));
+    for(const c of (d.categories||[])) if(c && c.id) await setDoc(doc(db, 'portal_categories', c.id), clean(c));
+    if(d.config) await setDoc(settingsDocRef, { portalName: d.config.portalName || PORTAL_NAME, portalSub: d.config.portalSub ?? PORTAL_SUB, portalIcon: d.config.portalIcon || PORTAL_ICON }, {merge:true});
+    logAction('استعادة نسخة احتياطية', when);
+    showToast(`تمت الاستعادة من نسخة ${when} ✓`);
+  }catch(err){ console.error(err); showToast('تعذّرت الاستعادة: ' + (err.code || err.message)); }
 });
 bkInit();
 
